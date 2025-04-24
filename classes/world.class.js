@@ -24,6 +24,7 @@ class World {
     this.addObjectsToMap(this.level.clouds);
     this.addToMap(this.char);
     this.addObjectsToMap(this.level.enemies);
+    this.addObjectsToMap(this.level.coins);
     this.ctx.translate(-this.camera_x, 0);
     let self = this;
     requestAnimationFrame(function () {

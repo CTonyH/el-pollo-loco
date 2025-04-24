@@ -24,4 +24,11 @@ class MoveableObject {
         this.x -= this.speed;
       }, 1000 / 60);
   }
+
+  playAnimation(image){
+    let i = this.currentImage % image.length;
+    let path = image[i];
+    this.img = this.imageCache[path];
+    this.currentImage++;
+  }
 }
