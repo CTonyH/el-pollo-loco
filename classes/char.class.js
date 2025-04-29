@@ -31,21 +31,29 @@ class Char extends MoveableObject {
     "img/2_character_pepe/5_dead/D-56.png",
     "img/2_character_pepe/5_dead/D-57.png",
   ];
-  IMAGES_HURT = [
-    'img/2_character_pepe/4_hurt/H-41.png',
-    'img/2_character_pepe/4_hurt/H-42.png',
-    'img/2_character_pepe/4_hurt/H-43.png'
+  IMAGES_HURT = ["img/2_character_pepe/4_hurt/H-41.png", "img/2_character_pepe/4_hurt/H-42.png", "img/2_character_pepe/4_hurt/H-43.png"];
+  IMAGES_IDLE = [
+    "img/2_character_pepe/1_idle/idle/I-1.png",
+    "img/2_character_pepe/1_idle/idle/I-2.png",
+    "img/2_character_pepe/1_idle/idle/I-3.png",
+    "img/2_character_pepe/1_idle/idle/I-4.png",
+    "img/2_character_pepe/1_idle/idle/I-5.png",
+    "img/2_character_pepe/1_idle/idle/I-6.png",
+    "img/2_character_pepe/1_idle/idle/I-7.png",
+    "img/2_character_pepe/1_idle/idle/I-8.png",
+    "img/2_character_pepe/1_idle/idle/I-9.png",
+    "img/2_character_pepe/1_idle/idle/I-10.png",
   ];
-
 
   world;
   speed = 10;
   constructor() {
-    super().loadImage("img/2_character_pepe/2_walk/W-21.png", 100, 200);
+    super().loadImage("img/2_character_pepe/1_idle/idle/I-1.png", 100, 200);
     this.loadImages(this.IMAGES_WALKING);
     this.loadImages(this.IMAGES_JUMPING);
     this.loadImages(this.CHAR_IMAGES_DEAD);
     this.loadImages(this.IMAGES_HURT);
+    this.loadImages(this.IMAGES_IDLE);
     this.x = 100;
     this.animate();
     this.applyGravity();
@@ -69,18 +77,38 @@ class Char extends MoveableObject {
       this.world.camera_x = -this.x + 100;
     }, 1000 / 60);
 
-    setInterval(() => {
-      if (this.isDead()) {
-        this.playAnimation(this.CHAR_IMAGES_DEAD);
+    this.animationInterval = setInterval(() => {
+      if (this.isDead() && !this.deadAnimationPlayed) {
+        this.deadAnimationPlayed = true;
+        clearInterval(this.animationInterval);
+        clearInterval(this.movementInterval);
+        this.playAnimationOnce(this.CHAR_IMAGES_DEAD, () => {
+          this.visible = false;
+          this.world.gameOver = true;
+        });
       } else if (this.isHurt()) {
-        this.playAnimation(this.IMAGES_HURT)
-      } if (this.isAboveGround()) {
+        this.playAnimation(this.IMAGES_HURT);
+      } else if (this.isAboveGround()) {
         this.playAnimation(this.IMAGES_JUMPING);
+      } else if (this.world.keyboard.RIGHT || this.world.keyboard.LEFT) {
+        this.playAnimation(this.IMAGES_WALKING);
       } else {
-        if (this.world.keyboard.RIGHT || this.world.keyboard.LEFT) {
-          this.playAnimation(this.IMAGES_WALKING);
-        }
+        this.playAnimation(this.IMAGES_IDLE);
       }
-    }, 400);
+    }, 100);
+  }
+
+  playAnimationOnce(images, onComplete) {
+    let i = 0;
+    let interval = setInterval(() => {
+      if (i < images.length) {
+        let path = images[i];
+        this.img = this.imageCache[path];
+        i++;
+      } else {
+        clearInterval(interval);
+        if (onComplete) onComplete();
+      }
+    }, 100);
   }
 }

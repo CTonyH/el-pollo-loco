@@ -1,11 +1,9 @@
 class MoveableObject extends DrawableObject {
-  
   speed = 1.2;
   otherDirection = false;
   speedY = 0;
   acceleration = 2.5;
   energy = 100;
-
 
   applyGravity() {
     setInterval(() => {
@@ -17,25 +15,18 @@ class MoveableObject extends DrawableObject {
   }
 
   isAboveGround() {
-    return this.y < 180;
+    if (this instanceof ThrowableObject) {
+      return true;
+    } else {
+      return this.y < 180;
+    }
   }
 
- 
-
- 
-
- 
-
-
-
-  isColliding(mo){
-    return this.x + this.width > mo.x &&
-    this.y + this.height > mo.y &&
-    this.x < mo.x &&
-    this.y < mo.y + mo.height;
+  isColliding(mo) {
+    return this.x + this.width > mo.x && this.y + this.height > mo.y && this.x < mo.x && this.y < mo.y + mo.height;
   }
 
-  hit(){
+  hit() {
     this.energy -= 5;
     if (this.energy < 0) {
       this.energy = 0;
@@ -44,17 +35,15 @@ class MoveableObject extends DrawableObject {
     }
   }
 
-  isHurt(){
+  isHurt() {
     let timepassed = new Date().getTime() - this.lastHit;
-    timepassed = timepassed / 1000;
-    return timepassed < 5; 
+    timepassed = timepassed / 100;
+    return timepassed < 5;
   }
 
-  isDead(){
+  isDead() {
     return this.energy == 0;
   }
-
-  
 
   playAnimation(image) {
     let i = this.currentImage % image.length;

@@ -6,6 +6,9 @@ class World {
   keyboard;
   camera_x = 0;
   statusBar = new StatusBar();
+  throwableObjects = [];
+  gameOverImage = new Image();
+  
 
   constructor(canvas, keyboard) {
     this.ctx = canvas.getContext("2d");
@@ -13,24 +16,39 @@ class World {
     this.keyboard = keyboard;
     this.render();
     this.setWorld();
-    this.checkCollisions();
+    this.run();
+    this.gameOverImage.onload = () =>{
+      this.gameOverImageLoaded = true;
+    };
+    this.gameOverImage.src = 'img/You won, you lost/Game over A.png';
+    this.gameOver = false;
   }
 
   setWorld() {
     this.char.world = this;
   }
 
-  checkCollisions() {
+  run() {
     setInterval(() => {
-      this.level.enemies.forEach((enemy) => {
-        if (this.char.isColliding(enemy)) {
-          this.char.hit();
-          this.statusBar.setPercentage(this.char.energy);
-
-          
-        }
-      });
+      this.checkCollisions();
+      this.checkThrowableObjects();
     }, 200);
+  }
+
+  checkThrowableObjects(){
+    if (this.keyboard.D) {
+      let bottle = new ThrowableObject(this.char.x + 100, this.char.y + 100);
+      this.throwableObjects.push(bottle);
+    }
+  }
+
+  checkCollisions() {
+    this.level.enemies.forEach((enemy) => {
+      if (this.char.isColliding(enemy)) {
+        this.char.hit();
+        this.statusBar.setPercentage(this.char.energy);
+      }
+    });
   }
 
   render() {
@@ -45,14 +63,27 @@ class World {
 
     this.addToMap(this.char);
     this.addObjectsToMap(this.level.clouds);
+    this.addObjectsToMap(this.throwableObjects);
     this.addObjectsToMap(this.level.enemies);
     this.addObjectsToMap(this.level.coins);
+    this.addObjectsToMap(this.level.bottles);
 
     this.ctx.translate(-this.camera_x, 0);
     let self = this;
+    if (this.gameOver && this.gameOverImageLoaded) {
+      this.ctx.drawImage(
+        this.gameOverImage,
+        this.canvas.width / 2 - 200,
+        this.canvas.height / 2 - 100,
+        400,
+        200
+      );
+      return;
+    }
     requestAnimationFrame(function () {
       self.render();
     });
+   
   }
 
   addObjectsToMap(objects) {

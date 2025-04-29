@@ -1,11 +1,18 @@
-body{
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    /* justify-content: center; */
-    /* height: 100vh; */
+body {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  /* justify-content: center; */
+  /* height: 100vh; */
 }
 
-canvas{
-    background-color: black;
+canvas {
+  background-color: black;
+}
+
+#game-over {
+  display: none;
+  position: absolute;
+  top: 150px;
+  align-items: center;
 }
