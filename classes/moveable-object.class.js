@@ -4,26 +4,34 @@ class MoveableObject extends DrawableObject {
   speedY = 0;
   acceleration = 2.5;
   energy = 100;
+  coins = 0;
+  bottles = 0;
+  
 
   applyGravity() {
+    console.log("applyGravity läuft")
     setInterval(() => {
-      if (this.isAboveGround() || this.speedY > 0) {
+      if (this.y < 180 || this.speedY > 0) {
         this.y -= this.speedY;
         this.speedY -= this.acceleration;
+        console.log('das ist this.y', this.y)
+        if (this.y >= 180) {
+          this.y = 180;
+          this.speedY = 0;
+        }
       }
     }, 1000 / 25);
   }
 
   isAboveGround() {
-    if (this instanceof ThrowableObject) {
-      return true;
-    } else {
-      return this.y < 180;
-    }
+    return this.y < 180;
   }
 
   isColliding(mo) {
-    return this.x + this.width > mo.x && this.y + this.height > mo.y && this.x < mo.x && this.y < mo.y + mo.height;
+    return this.rX + this.rW > mo.rX&&
+    this.rY + this.rH > mo.rY&&
+    this.rX < mo.rX&&
+    this.rY < mo.rY + mo.rH;
   }
 
   hit() {
@@ -37,12 +45,11 @@ class MoveableObject extends DrawableObject {
 
   isHurt() {
     let timepassed = new Date().getTime() - this.lastHit;
-    timepassed = timepassed / 100;
-    return timepassed < 5;
+    return timepassed / 100 < 5;
   }
 
   isDead() {
-    return this.energy == 0;
+    return this.energy === 0;
   }
 
   playAnimation(image) {
@@ -63,6 +70,6 @@ class MoveableObject extends DrawableObject {
   }
 
   jump() {
-    this.speedY = 20;
+      this.speedY = 30;
   }
 }

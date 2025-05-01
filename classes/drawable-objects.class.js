@@ -25,11 +25,11 @@ class DrawableObject {
   } 
 
     drawFramework(ctx) {
-    if (this instanceof Char || this instanceof Chicken || this instanceof Endboss) {
+    if (this instanceof Char || this instanceof Chicken || this instanceof Endboss || this instanceof Coins || this instanceof Bottle) {
       ctx.beginPath();
       ctx.lineWidth = "5";
-      ctx.strokeStyle = "blue";
-      ctx.rect(this.x, this.y, this.width, this.height);
+      ctx.strokeStyle = "red";
+      ctx.rect(this.rX, this.rY, this.rW, this.rH);
       ctx.stroke();
     }
   }
