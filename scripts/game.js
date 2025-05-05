@@ -50,3 +50,16 @@ window.addEventListener("keyup", (e) => {
     keyboard.D = false;
   }
 });
+
+function startGame() {
+  canvas = document.getElementById('canvas');
+  keyboard = new Keyboard();
+  world = new World(canvas, keyboard);
+}
+startGame();
+function restartGame() {
+  // Alles neu erzeugen
+  keyboard = new Keyboard();
+  world = new World(canvas, keyboard);
+}
+

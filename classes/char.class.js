@@ -51,15 +51,18 @@ class Char extends MoveableObject {
   rY;
   rW;
   rH;
+  
   offset = {
     top: 70,
     right: 30,
     bottom: 10,
     left: 20
   };
+  lastHit = 0;
 
-  constructor() {
+  constructor(world) {
     super().loadImage("img/2_character_pepe/1_idle/idle/I-1.png", 100, 200);
+    this.world = world;
     this.loadImages(this.IMAGES_WALKING);
     this.loadImages(this.IMAGES_JUMPING);
     this.loadImages(this.CHAR_IMAGES_DEAD);
