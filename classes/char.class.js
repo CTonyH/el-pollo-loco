@@ -60,9 +60,10 @@ class Char extends MoveableObject {
   };
   lastHit = 0;
 
-  constructor(world) {
+  constructor(world, keyboard) {
     super().loadImage("img/2_character_pepe/1_idle/idle/I-1.png", 100, 200);
     this.world = world;
+    this.keyboard = keyboard
     this.loadImages(this.IMAGES_WALKING);
     this.loadImages(this.IMAGES_JUMPING);
     this.loadImages(this.CHAR_IMAGES_DEAD);
@@ -88,6 +89,7 @@ class Char extends MoveableObject {
   }
 
   animate() {
+ 
     setInterval(() => {
       if (this.world.keyboard.RIGHT && this.x < this.world.level.level_end_x) {
         this.moveRight();

@@ -3,7 +3,7 @@ let world;
 let keyboard = new Keyboard();
 
 function init() {
-  let canvas = document.getElementById("canvas");
+  canvas = document.getElementById("canvas");
   world = new World(canvas, keyboard);
 }
 
@@ -51,15 +51,26 @@ window.addEventListener("keyup", (e) => {
   }
 });
 
-function startGame() {
-  canvas = document.getElementById('canvas');
-  keyboard = new Keyboard();
-  world = new World(canvas, keyboard);
-}
-startGame();
 function restartGame() {
-  // Alles neu erzeugen
-  keyboard = new Keyboard();
+  // 1. Alle laufenden Intervalle stoppen (falls du sie gespeichert hast)
+  if (world?.char?.animationInterval) clearInterval(world.char.animationInterval);
+  if (world?.char?.movementInterval) clearInterval(world.char.movementInterval);
+  
+  // 2. Musik/Audio stoppen
+  // if (world?.backgroundMusic) {
+  //   world.backgroundMusic.pause();
+  //   world.backgroundMusic.currentTime = 0;
+  // }
+
+  // 3. DOM-Status zurücksetzen (z.B. Statusleisten)
+  document.getElementById("game-over-screen").style.display = "none";
+  // Optional: Status-Leisten manuell auf 0/Startwert setzen
+
+  // 4. Gegner / Endboss / Items etc. zurücksetzen passiert beim Laden von Level
+  level1 = createLevel1(); // Falls du dynamisch generierst
+  keyboard = new Keyboard();   // Neue Tastaturinstanz
+  
+  // 5. Neue Welt erstellen (neues Spiel)
   world = new World(canvas, keyboard);
 }
 

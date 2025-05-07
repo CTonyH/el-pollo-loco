@@ -1,6 +1,5 @@
 class World {
-  char = new Char();
-  level = level1;
+  level = createLevel1();
   ctx;
   canvas;
   keyboard;
@@ -8,15 +7,20 @@ class World {
   statusBar = new StatusBar("health", 10, 3, 100);
   coinsBar = new StatusBar("coins", 10, 35, 0);
   bottlesBar = new StatusBar("bottles", 10, 65, 0);
+  endbossBar = new EndbossStatusbar();
   throwableObjects = [];
   gameOverImage = new Image();
   world;
+  bossTriggered = false;
+  bossTriggerX = 1800;
 
   constructor(canvas, keyboard) {
     this.canvas = canvas;
     this.keyboard = keyboard;
     this.ctx = canvas.getContext("2d");
-    this.char = new Char(this);
+    this.char = new Char(this, keyboard);
+    this.lastThrowTime = 0;
+
     this.render();
     this.setWorld();
     this.run();
@@ -27,6 +31,7 @@ class World {
     this.gameOver = false;
     this.maxCoins = this.level.coins.length;
     this.maxBottles = this.level.bottles.length;
+    this.endboss = this.level.enemies.find((e) => e instanceof Endboss);
   }
 
   setWorld() {
@@ -42,7 +47,8 @@ class World {
 
   checkThrowableObjects() {
     if (this.keyboard.D && this.char.bottles > 0) {
-      let bottle = new ThrowableObject(this.char.rX + 100, this.char.rY + 100);
+      let direction = this.char.otherDirection ? "left" : "right";
+      let bottle = new ThrowableObject(this.char.rX + 100, this.char.rY + 100, direction);
       this.throwableObjects.push(bottle);
       this.char.bottles -= 1;
       this.bottlesBar.setPercentage(this.char.bottles * 10);
@@ -52,7 +58,6 @@ class World {
   checkCollisions() {
     this.level.enemies.forEach((enemy) => {
       if (this.char.isColliding(enemy)) {
-        console.log("Collision detected");
         const charBottom = this.char.y + this.char.height;
         const enemyTop = enemy.y;
 
@@ -87,8 +92,9 @@ class World {
 
     this.throwableObjects.forEach((bottle, index) => {
       this.level.enemies.forEach((enemy) => {
-        if (!bottle.broken && bottle.isColliding(enemy)) {
+        if (!bottle.broken && this.level.endboss && bottle.isColliding(enemy)) {
           bottle.break();
+          this.level.endboss.hit();
           enemy.gotHit();
         }
       });
@@ -106,6 +112,13 @@ class World {
     this.addObjectsToMap(this.level.backgroundObjects);
 
     this.addToMap(this.char);
+    if (!this.bossTriggered && this.char.x >= this.bossTriggerX) {
+      this.bossTriggered = true;
+      this.endboss.flyIn(() => {
+        this.endboss.startBehavior(this.char);
+        this.bossBehaviorStarted = true;
+      });
+    }
 
     this.addObjectsToMap(this.level.clouds);
     this.addObjectsToMap(this.throwableObjects);
@@ -117,6 +130,12 @@ class World {
     this.addToMap(this.coinsBar);
     this.addToMap(this.bottlesBar);
     this.ctx.translate(this.camera_x, 0);
+    if (this.endboss && this.endbossBar) {
+      this.endbossBar.updatePosition(this.endboss);
+
+      this.addToMap(this.endbossBar);
+      this.endbossBar.setPercentage(this.endboss.energy);
+    }
     this.level.enemies.forEach((e) => e.move && e.move());
     this.level.enemies = this.level.enemies.filter((e) => !e.markedForDeletion);
     this.throwableObjects.forEach((bottle) => {
@@ -133,56 +152,10 @@ class World {
   gameOverScreen() {
     if (this.gameOver && this.gameOverImageLoaded) {
       this.ctx.drawImage(this.gameOverImage, this.canvas.width / 2 - 200, this.canvas.height / 2 - 100, 400, 200);
-      this.ctx.fillStyle = "red";
 
-      //Restart-Button
-      const restartY = this.canvas.height / 2 + 150;
-      this.ctx.fillStyle = "blue";
-      this.ctx.fillRect(this.canvas.width / 2 - 75, restartY, 150, 40);
-      this.ctx.fillStyle = "white";
-      this.ctx.font = "20px Fredericka";
-      this.ctx.fillText("Restart", this.canvas.width / 2 - 35, restartY + 28);
-
-      //Hauptmenü-Button
-      const menuY = restartY + 60;
-      this.ctx.fillStyle = "blue";
-      this.ctx.fillRect(this.canvas.width / 2 - 75, menuY, 150, 40);
-      this.ctx.fillStyle = "white";
-      this.ctx.fillText("Hauptmenü", this.canvas.width / 2 - 50, menuY + 28);
-
-      this.registerRestartClick();
-      return;
+      // Zeige HTML-Buttons
+      document.getElementById("game-over-screen").style.display = "block";
     }
-  }
-
-  registerRestartClick() {
-    this.canvas.addEventListener("click", (e) => {
-      const rect = this.canvas.getBoundingClientRect();
-      const x = e.clientX - rect.left;
-      const y = e.clientY - rect.top;
-
-      const restartBtn = {
-        x: this.canvas.width / 2 - 75,
-        y: this.canvas.height / 2 + 150,
-        w: 150,
-        h: 40,
-      };
-
-      const menuBtn = {
-        x: this.canvas.width / 2 - 75,
-        y: this.canvas.height / 2 + 210,
-        w: 150,
-        h: 40,
-      };
-
-      if (x >= restartBtn.x && x <= restartBtn.x + restartBtn.w && y >= restartBtn.y && y <= restartBtn.y + restartBtn.h) {
-        restartGame(); // oder: this.restartGame() wenn du das als Methode möchtest
-      }
-
-      if (x >= menuBtn.x && x <= menuBtn.x + menuBtn.w && y >= menuBtn.y && y <= menuBtn.y + menuBtn.h) {
-        startMenu(this.canvas);
-      }
-    });
   }
 
   addObjectsToMap(objects) {
@@ -212,39 +185,5 @@ class World {
   flipImageBack(mo) {
     mo.x = mo.x * -1;
     this.ctx.restore();
-  }
-}
-
-function startMenu(canvas) {
-  let ctx = canvas.getContext("2d");
-  ctx.clearRect(0, 0, canvas.width, canvas.height);
-  ctx.fillStyle = "#000";
-  ctx.fillRect(0, 0, canvas.width, canvas.height);
-  ctx.fillStyle = "white";
-  ctx.font = "30px Fredericka";
-  ctx.fillText("Willkommen zum Spiel!", canvas.width / 2 - 150, canvas.height / 2 - 50);
-
-  ctx.fillStyle = "green";
-  ctx.fillRect(canvas.width / 2 - 75, canvas.height / 2, 150, 40);
-  ctx.fillStyle = "white";
-  ctx.fillText("Start", canvas.width / 2 - 30, canvas.height / 2 + 30);
-
-  canvas.addEventListener("click", handleStartClick);
-}
-
-function handleStartClick(e) {
-  const canvas = e.currentTarget; // ✅ korrektes Canvas-Element aus Event
-  const rect = canvas.getBoundingClientRect();
-  const x = e.clientX - rect.left;
-  const y = e.clientY - rect.top;
-
-  const btnX = canvas.width / 2 - 75;
-  const btnY = canvas.height / 2;
-  const btnW = 150;
-  const btnH = 40;
-
-  if (x >= btnX && x <= btnX + btnW && y >= btnY && y <= btnY + btnH) {
-    canvas.removeEventListener("click", handleStartClick);
-    startGame();
   }
 }

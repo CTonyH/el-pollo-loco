@@ -8,14 +8,12 @@ class MoveableObject extends DrawableObject {
   bottles = 0;
 
   applyGravity() {
-    console.log("applyGravity läuft");
-    setInterval(() => {
+    this.gravityInterval = setInterval(() => {
       if (this.y < 180 || this.speedY > 0) {
         this.y -= this.speedY;
         this.speedY -= this.acceleration;
-        console.log("das ist this.y", this.y);
-        if (this.y >= 180) {
-          this.y = 180;
+        if (this.y >= 350) {
+          this.y = 350;
           this.speedY = 0;
         }
       }
@@ -23,7 +21,7 @@ class MoveableObject extends DrawableObject {
   }
 
   isAboveGround() {
-    return this.y < 180;
+    return this.y < 180 ;
   }
 
   isColliding(mo) {

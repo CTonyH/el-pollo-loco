@@ -14,25 +14,33 @@ class ThrowableObject extends MoveableObject {
     "img/6_salsa_bottle/bottle_rotation/bottle_splash/6_bottle_splash.png",
   ];
 
-  constructor(x, y) {
+  constructor(x, y, direction) {
     super();
     this.loadImages(this.IMAGES_BOTTLE);
     this.loadImages(this.IMAGES_BROKEN);
     this.img = this.imageCache[this.IMAGES_BOTTLE[0]];
     this.x = x;
-    this.y = y;
+    this.y = y - 50;
     this.height = 100;
     this.broken = false;
+    this.otherDirection = direction;
     this.throw();
     this.animate();
   }
 
-  throw() {
-    this.speedY = 15; // nach oben
+  throw(direction) {
+    this.speedY = 10; // nach oben
+    this.acceleration = 0.5;
     this.applyGravity(); // startet Interval mit Fallbewegung
 
+    if (direction === "left") {
+      this.xSpeed = -10;
+    } else {
+      this.xSpeed = 10;
+    }
+
     this.throwInterval = setInterval(() => {
-      this.x += 10; // rechtsbewegung
+      this.x += this.otherDirection ? -10 : 10; // rechtsbewegung
     }, 25);
   }
 
@@ -48,6 +56,7 @@ class ThrowableObject extends MoveableObject {
     this.broken = true;
     clearInterval(this.throwInterval);
     clearInterval(this.animationInterval);
+    clearInterval(this.gravityInterval);
 
     let i = 0;
     this.breakAnimation = setInterval(() => {

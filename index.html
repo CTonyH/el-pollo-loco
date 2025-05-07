@@ -19,6 +19,7 @@
     <script src="classes/coins.class.js"></script>
     <script src="classes/bottles.class.js"></script>
     <script src="classes/throwable.class.js"></script>
+    <script src="classes/endboss-statusbar.class.js"></script>
     <script src="levels/level1.js"></script>
     <script src="scripts/game.js"></script>
   </head>
@@ -28,5 +29,9 @@
       <img src="/img/You won, you lost/Game over A.png" alt="GameOver">
     </div>
     <canvas id="canvas" width="720" height="480"> </canvas>
+    <div id="game-over-screen" style="display: none; text-align: center; margin-top: 20px;">
+      <button onclick="restartGame()" id="restart-button">Restart</button>
+      <button onclick="startMenu(canvas)" id="menu-button">Hauptmenü</button>
+    </div>
   </body>
 </html>
