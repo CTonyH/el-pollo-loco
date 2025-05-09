@@ -1,27 +1,31 @@
 class MoveableObject extends DrawableObject {
   speed = 1.2;
   otherDirection = false;
-  speedY = 0;
+  speedY;
   acceleration = 2.5;
   energy = 100;
   coins = 0;
   bottles = 0;
 
   applyGravity() {
-    this.gravityInterval = setInterval(() => {
-      if (this.y < 180 || this.speedY > 0) {
+    setInterval(() => {
+      if (this.isAboveGround() || this.speedY > 0) {
         this.y -= this.speedY;
         this.speedY -= this.acceleration;
-        if (this.y >= 350) {
-          this.y = 350;
-          this.speedY = 0;
-        }
+      }else {
+        this.y = 180;
+        this.speedY = 0;
       }
+      
     }, 1000 / 25);
   }
 
   isAboveGround() {
-    return this.y < 180 ;
+    if (this instanceof ThrowableObject) {
+      return true;
+    }else{
+      return this.y < 180 ;
+    }
   }
 
   isColliding(mo) {
@@ -82,6 +86,8 @@ class MoveableObject extends DrawableObject {
     this.rY = this.y + (this.offset?.top || 0);
     this.rW = this.width - ((this.offset?.left || 0) + (this.offset?.right || 0));
     this.rH = this.height - ((this.offset?.top || 0) + (this.offset?.bottom || 0));
+    
+    
   }
   
 }

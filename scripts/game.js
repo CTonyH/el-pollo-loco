@@ -5,6 +5,7 @@ let keyboard = new Keyboard();
 function init() {
   canvas = document.getElementById("canvas");
   world = new World(canvas, keyboard);
+  // initLevel();
 }
 
 window.addEventListener("keydown", (e) => {
@@ -51,26 +52,26 @@ window.addEventListener("keyup", (e) => {
   }
 });
 
-function restartGame() {
-  // 1. Alle laufenden Intervalle stoppen (falls du sie gespeichert hast)
-  if (world?.char?.animationInterval) clearInterval(world.char.animationInterval);
-  if (world?.char?.movementInterval) clearInterval(world.char.movementInterval);
-  
-  // 2. Musik/Audio stoppen
-  // if (world?.backgroundMusic) {
-  //   world.backgroundMusic.pause();
-  //   world.backgroundMusic.currentTime = 0;
-  // }
+  function startGame(){
+    console.log('Fehler');
+    
+  document.getElementById('start-screen').style.display = 'none';
+  document.getElementById('canvas').style.display = 'block';
+  bttnDisappear()
+  initLevel();
+  init();
+}
 
-  // 3. DOM-Status zurücksetzen (z.B. Statusleisten)
-  document.getElementById("game-over-screen").style.display = "none";
-  // Optional: Status-Leisten manuell auf 0/Startwert setzen
+function showStartScreen() {
+  document.getElementById("start-screen").style.display = "block";
+  document.getElementById('canvas').style.display = 'none';
+  bttnDisappear();
+}
 
-  // 4. Gegner / Endboss / Items etc. zurücksetzen passiert beim Laden von Level
-  level1 = createLevel1(); // Falls du dynamisch generierst
-  keyboard = new Keyboard();   // Neue Tastaturinstanz
+function bttnDisappear(){
+  console.log('buttons verschwinden');
   
-  // 5. Neue Welt erstellen (neues Spiel)
-  world = new World(canvas, keyboard);
+  document.getElementById('restart-button').style.display = 'none';
+  document.getElementById('menu-button').style.display = 'none';
 }
 

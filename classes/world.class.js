@@ -1,5 +1,5 @@
 class World {
-  level = createLevel1();
+  level;
   ctx;
   canvas;
   keyboard;
@@ -10,6 +10,7 @@ class World {
   endbossBar = new EndbossStatusbar();
   throwableObjects = [];
   gameOverImage = new Image();
+  gameWonImage = new Image();
   world;
   bossTriggered = false;
   bossTriggerX = 1800;
@@ -20,15 +21,20 @@ class World {
     this.ctx = canvas.getContext("2d");
     this.char = new Char(this, keyboard);
     this.lastThrowTime = 0;
-
+    this.level = level1;
     this.render();
     this.setWorld();
     this.run();
     this.gameOverImage.onload = () => {
       this.gameOverImageLoaded = true;
     };
-    this.gameOverImage.src = "img/You won, you lost/Game over A.png";
+    this.gameWonImage.onload = () =>{
+      this.gameWonImageLoaded = true;
+    };
+    this.gameOverImage.src = "./img/9_intro_outro_screens/game_over/game over!.png";
+    this.gameWonImage.src = "./img/You won, you lost/You Win A.png"
     this.gameOver = false;
+    this.gameWon = false;
     this.maxCoins = this.level.coins.length;
     this.maxBottles = this.level.bottles.length;
     this.endboss = this.level.enemies.find((e) => e instanceof Endboss);
@@ -47,8 +53,7 @@ class World {
 
   checkThrowableObjects() {
     if (this.keyboard.D && this.char.bottles > 0) {
-      let direction = this.char.otherDirection ? "left" : "right";
-      let bottle = new ThrowableObject(this.char.rX + 100, this.char.rY + 100, direction);
+      let bottle = new ThrowableObject(this.char.x + 100, this.char.y + 100);
       this.throwableObjects.push(bottle);
       this.char.bottles -= 1;
       this.bottlesBar.setPercentage(this.char.bottles * 10);
@@ -60,10 +65,12 @@ class World {
       if (this.char.isColliding(enemy)) {
         const charBottom = this.char.y + this.char.height;
         const enemyTop = enemy.y;
-
+         
+        
         if (charBottom < enemyTop + 30) {
           enemy.gotHit();
           this.char.speedY = 20;
+          
         } else {
           this.char.hit();
           this.statusBar.setPercentage(this.char.energy);
@@ -90,18 +97,11 @@ class World {
       }
     });
 
-    this.throwableObjects.forEach((bottle, index) => {
-      this.level.enemies.forEach((enemy) => {
-        if (!bottle.broken && this.level.endboss && bottle.isColliding(enemy)) {
-          bottle.break();
-          this.level.endboss.hit();
-          enemy.gotHit();
-        }
-      });
-
-      if (!bottle.broken && this.level.endboss && bottle.isColliding(this.level.endboss)) {
+    this.throwableObjects.forEach((bottle) => {
+      if (!bottle.broken && this.endboss && bottle.isColliding(this.endboss)) {
         bottle.break();
-        this.level.endboss.hit();
+        this.endboss.hit();
+        this.endbossBar.setPercentage(this.endboss.energy);
       }
     });
   }
@@ -152,10 +152,20 @@ class World {
   gameOverScreen() {
     if (this.gameOver && this.gameOverImageLoaded) {
       this.ctx.drawImage(this.gameOverImage, this.canvas.width / 2 - 200, this.canvas.height / 2 - 100, 400, 200);
-
-      // Zeige HTML-Buttons
+      console.log('buttons werden geladen');
       document.getElementById("game-over-screen").style.display = "block";
+      document.getElementById("restart-button").style.display = "block";
+      document.getElementById("menu-button").style.display = "block";
+      this.gameOver = false;
     }
+    if(this.gameWon && this.gameWonImageLoaded){
+      this.ctx.drawImage(this.gameWonImage, this.canvas.width / 2 - 200, this.canvas.height / 2 - 100, 400, 200);
+      document.getElementById("game-won-screen").style.display = "block";
+      document.getElementById("restart-button").style.display = "block";
+      document.getElementById("menu-button").style.display = "block";
+      this.gameWon = false;
+    }
+
   }
 
   addObjectsToMap(objects) {

@@ -31,6 +31,12 @@ class Endboss extends MoveableObject {
     "img/4_enemie_boss_chicken/3_attack/G20.png",
   ];
 
+  IMAGES_DEAD = [
+    'img/4_enemie_boss_chicken/5_dead/G24.png',
+    'img/4_enemie_boss_chicken/5_dead/G25.png',
+    'img/4_enemie_boss_chicken/5_dead/G26.png'
+  ];
+
   rX;
   rY;
   rW;
@@ -48,6 +54,7 @@ class Endboss extends MoveableObject {
     this.loadImages(this.IMAGES_ALERT);
     this.loadImages(this.IMAGES_WALK);
     this.loadImages(this.IMAGES_ATTACK);
+    this.loadImages(this.IMAGES_DEAD);
     this.x = 2800;
     this.y = -400;
   }
@@ -106,7 +113,7 @@ class Endboss extends MoveableObject {
       } else {
         this.y = 45;
         clearInterval(interval);
-        this.animateAlert(); // nur hier rufen wir die Animation bewusst auf
+        this.animateAlert(); 
         if(onComplete) onComplete();
       }
     }, 30);
@@ -121,12 +128,42 @@ class Endboss extends MoveableObject {
   }
 
   hit() {
-    this.energy -= 20; // z. B. 20 Schaden pro Flasche
+    this.energy -= 20; 
     if (this.energy < 0) this.energy = 0;
   
-    // Optional: Animation oder Verhalten bei Schaden
+    
     if (this.energy === 0) {
-      this.die(); // falls du ein Ende oder Tod hast
+      this.die(); 
     }
+  }
+
+  die() {
+    this.speed = 0;
+    this.stopAnimation();
+    this.playDeathAnimation();
+  
+    setTimeout(() => {
+      this.markedForDeletion = true; 
+      world.gameWon = true;
+    },this.IMAGES_DEAD.length * 150 + 200); 
+  }
+
+  playDeathAnimation() {
+    if (this.deathAnimation) return;
+
+    let i = 0;
+    this.deathAnimation = setInterval(() => {
+      if (i < this.IMAGES_DEAD.length) {
+        let imgPath = this.IMAGES_DEAD[i];
+        let loadedImage = this.imageCache[imgPath];
+        if (loadedImage) {
+          this.img = loadedImage;
+        }
+        i++;
+      } else {
+        clearInterval(this.deathAnimation);
+        this.deathAnimation = null;
+      }
+    }, 400);
   }
 }

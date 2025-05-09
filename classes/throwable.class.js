@@ -28,19 +28,13 @@ class ThrowableObject extends MoveableObject {
     this.animate();
   }
 
-  throw(direction) {
-    this.speedY = 10; // nach oben
+  throw() {
+    this.speedY = 10;
     this.acceleration = 0.5;
-    this.applyGravity(); // startet Interval mit Fallbewegung
+    this.applyGravity(); 
 
-    if (direction === "left") {
-      this.xSpeed = -10;
-    } else {
-      this.xSpeed = 10;
-    }
-
-    this.throwInterval = setInterval(() => {
-      this.x += this.otherDirection ? -10 : 10; // rechtsbewegung
+      this.throwInterval = setInterval(() => {
+      this.x += 10 
     }, 25);
   }
 
@@ -73,7 +67,7 @@ class ThrowableObject extends MoveableObject {
   }
 
   checkGroundCollision() {
-    if (this.y >= 350 && !this.broken) {
+    if (this.y >= 320 && !this.broken) {
       this.break();
     }
   }

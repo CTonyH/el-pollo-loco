@@ -1,6 +1,6 @@
 class Chicken extends MoveableObject {
-  width = 45;
-  height = 40;
+  width = 85;
+  height = 80;
   mirrow = false;
   IMAGES_WALKING = [
     "img/3_enemies_chicken/chicken_normal/1_walk/1_w.png",
@@ -27,8 +27,8 @@ class Chicken extends MoveableObject {
     super().loadImage("img/3_enemies_chicken/chicken_normal/1_walk/1_w.png");
     this.loadImages(this.IMAGES_WALKING);
     this.loadImages(this.IMAGE_DEAD);
-    this.x = 400 + Math.random() * 300;
-    this.y = 375;
+    this.x = 1000 + Math.random() * 3000;
+    this.y = 350;
     this.speed = 0.15 + Math.random() * 0.5;
     this.animate();
   }
@@ -51,18 +51,19 @@ class Chicken extends MoveableObject {
       this.moveLeft(this.mirrow);
     }, 1000 / 60);
 
-    setInterval(() => {
+    this.animationIntervall = setInterval(() => {
       this.playAnimation(this.IMAGES_WALKING);
     }, 200);
   }
 
   gotHit() {
     this.defeated = true;
+    clearInterval(this.animationIntervall);
     this.img = this.imageCache[this.IMAGE_DEAD];
     this.speed = 0;
     setTimeout(() => {
       this.markedForDeletion = true;
-    }, 1000);
+    }, 500);
   }
 
   move() {
