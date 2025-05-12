@@ -32,9 +32,9 @@ class Endboss extends MoveableObject {
   ];
 
   IMAGES_DEAD = [
-    'img/4_enemie_boss_chicken/5_dead/G24.png',
-    'img/4_enemie_boss_chicken/5_dead/G25.png',
-    'img/4_enemie_boss_chicken/5_dead/G26.png'
+    "img/4_enemie_boss_chicken/5_dead/G24.png",
+    "img/4_enemie_boss_chicken/5_dead/G25.png",
+    "img/4_enemie_boss_chicken/5_dead/G26.png",
   ];
 
   rX;
@@ -48,6 +48,7 @@ class Endboss extends MoveableObject {
     left: 20,
   };
   animationInterval;
+  gameWon = false;
 
   constructor() {
     super().loadImage(this.IMAGES_ALERT[0]);
@@ -63,10 +64,10 @@ class Endboss extends MoveableObject {
     this.stopAnimation();
     this.animationInterval = setInterval(() => {
       let distance = this.x - char.x;
-  
+
       if (Math.abs(distance) > 100) {
         this.playAnimation(this.IMAGES_WALK);
-  
+
         // Drehrichtung abhängig von Spielerposition
         if (char.x < this.x) {
           this.otherDirection = false;
@@ -75,14 +76,13 @@ class Endboss extends MoveableObject {
           this.otherDirection = true;
           this.moveRight();
         }
-  
       } else {
         this.playAnimation(this.IMAGES_ATTACK);
       }
     }, 150);
   }
 
-  stopAnimation(){
+  stopAnimation() {
     clearInterval(this.animationInterval);
   }
 
@@ -113,13 +113,13 @@ class Endboss extends MoveableObject {
       } else {
         this.y = 45;
         clearInterval(interval);
-        this.animateAlert(); 
-        if(onComplete) onComplete();
+        this.animateAlert();
+        if (onComplete) onComplete();
       }
     }, 30);
   }
 
-  moveLeft(){
+  moveLeft() {
     this.x -= 30;
   }
 
@@ -128,12 +128,11 @@ class Endboss extends MoveableObject {
   }
 
   hit() {
-    this.energy -= 20; 
+    this.energy -= 20;
     if (this.energy < 0) this.energy = 0;
-  
-    
+
     if (this.energy === 0) {
-      this.die(); 
+      this.die();
     }
   }
 
@@ -141,11 +140,11 @@ class Endboss extends MoveableObject {
     this.speed = 0;
     this.stopAnimation();
     this.playDeathAnimation();
-  
+
     setTimeout(() => {
-      this.markedForDeletion = true; 
-      world.gameWon = true;
-    },this.IMAGES_DEAD.length * 150 + 200); 
+      this.markedForDeletion = true;
+      this.gameWonScreen();
+    }, this.IMAGES_DEAD.length * 150 + 200);
   }
 
   playDeathAnimation() {
@@ -165,5 +164,14 @@ class Endboss extends MoveableObject {
         this.deathAnimation = null;
       }
     }, 400);
+  }
+
+  gameWonScreen() {
+    world.gameWon = true;
+    document.getElementById("game-won").style.display = "block";
+    document.getElementById("game-won-screen").style.display = "flex";
+    document.getElementById("restart-button").style.display = "block";
+    document.getElementById("menu-button").style.display = "block";
+    document.getElementById("canvas").style.display = "none";
   }
 }

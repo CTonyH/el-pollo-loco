@@ -115,7 +115,7 @@ class Char extends MoveableObject {
         clearInterval(this.movementInterval);
         this.playAnimationOnce(this.CHAR_IMAGES_DEAD, () => {
           this.visible = false;
-          this.world.gameOver = true;
+          this.gameOverScreen();
         });
       } else if (this.isHurt()) {
         this.playAnimation(this.IMAGES_HURT);
@@ -141,5 +141,13 @@ class Char extends MoveableObject {
         if (onComplete) onComplete();
       }
     }, 100);
+  }
+
+  gameOverScreen() {
+    document.getElementById("game-over").style.display = "block";
+    document.getElementById("game-over-screen").style.display = "flex";
+    document.getElementById("restart-button").style.display = "block";
+    document.getElementById("menu-button").style.display = "block";
+    document.getElementById('canvas').style.display = 'none';
   }
 }

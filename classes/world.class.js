@@ -9,10 +9,10 @@ class World {
   bottlesBar = new StatusBar("bottles", 10, 65, 0);
   endbossBar = new EndbossStatusbar();
   throwableObjects = [];
-  gameOverImage = new Image();
-  gameWonImage = new Image();
+  // gameOverImage = new Image();
+  // gameWonImage = new Image();
   world;
-  bossTriggered = false;
+  gameWon = false;
   bossTriggerX = 1800;
 
   constructor(canvas, keyboard) {
@@ -25,16 +25,15 @@ class World {
     this.render();
     this.setWorld();
     this.run();
-    this.gameOverImage.onload = () => {
-      this.gameOverImageLoaded = true;
-    };
-    this.gameWonImage.onload = () =>{
-      this.gameWonImageLoaded = true;
-    };
-    this.gameOverImage.src = "./img/9_intro_outro_screens/game_over/game over!.png";
-    this.gameWonImage.src = "./img/You won, you lost/You Win A.png"
+    // this.gameOverImage.onload = () => {
+    //   this.gameOverImageLoaded = true;
+    // };
+    // this.gameWonImage.onload = () =>{
+    //   this.gameWonImageLoaded = true;
+    // };
+    // this.gameOverImage.src = "./img/9_intro_outro_screens/game_over/game over!.png";
+    // this.gameWonImage.src = "./img/You won, you lost/You Win A.png"
     this.gameOver = false;
-    this.gameWon = false;
     this.maxCoins = this.level.coins.length;
     this.maxBottles = this.level.bottles.length;
     this.endboss = this.level.enemies.find((e) => e instanceof Endboss);
@@ -143,29 +142,9 @@ class World {
     });
     this.ctx.translate(-this.camera_x, 0);
     let self = this;
-    this.gameOverScreen();
     requestAnimationFrame(function () {
       self.render();
     });
-  }
-
-  gameOverScreen() {
-    if (this.gameOver && this.gameOverImageLoaded) {
-      this.ctx.drawImage(this.gameOverImage, this.canvas.width / 2 - 200, this.canvas.height / 2 - 100, 400, 200);
-      console.log('buttons werden geladen');
-      document.getElementById("game-over-screen").style.display = "block";
-      document.getElementById("restart-button").style.display = "block";
-      document.getElementById("menu-button").style.display = "block";
-      this.gameOver = false;
-    }
-    if(this.gameWon && this.gameWonImageLoaded){
-      this.ctx.drawImage(this.gameWonImage, this.canvas.width / 2 - 200, this.canvas.height / 2 - 100, 400, 200);
-      document.getElementById("game-won-screen").style.display = "block";
-      document.getElementById("restart-button").style.display = "block";
-      document.getElementById("menu-button").style.display = "block";
-      this.gameWon = false;
-    }
-
   }
 
   addObjectsToMap(objects) {

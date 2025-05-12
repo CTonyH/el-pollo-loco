@@ -7,43 +7,43 @@ class MoveableObject extends DrawableObject {
   coins = 0;
   bottles = 0;
 
+  constructor() {
+    super();
+    this.world = world;
+  }
+
   applyGravity() {
     setInterval(() => {
       if (this.isAboveGround() || this.speedY > 0) {
         this.y -= this.speedY;
         this.speedY -= this.acceleration;
-      }else {
+      } else {
         this.y = 180;
         this.speedY = 0;
       }
-      
     }, 1000 / 25);
   }
 
   isAboveGround() {
     if (this instanceof ThrowableObject) {
       return true;
-    }else{
-      return this.y < 180 ;
+    } else {
+      return this.y < 180;
     }
   }
 
   isColliding(mo) {
     this.getRealFrame();
     mo.getRealFrame();
-    return this.rX + this.rW > mo.rX &&
-           this.rX < mo.rX + mo.rW &&
-           this.rY + this.rH > mo.rY &&
-           this.rY < mo.rY + mo.rH;
+    return this.rX + this.rW > mo.rX && this.rX < mo.rX + mo.rW && this.rY + this.rH > mo.rY && this.rY < mo.rY + mo.rH;
   }
 
   hit() {
+    if (this.world.gameWon) return
     const now = new Date().getTime();
     if (now - this.lastHit < 1000) return;
-    
     this.energy -= 10;
     this.lastHit = now;
-
     if (this.energy <= 0) {
       this.energy = 0;
     } else {
@@ -86,8 +86,5 @@ class MoveableObject extends DrawableObject {
     this.rY = this.y + (this.offset?.top || 0);
     this.rW = this.width - ((this.offset?.left || 0) + (this.offset?.right || 0));
     this.rH = this.height - ((this.offset?.top || 0) + (this.offset?.bottom || 0));
-    
-    
   }
-  
 }

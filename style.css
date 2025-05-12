@@ -62,7 +62,20 @@ canvas {
 
 .endgame-buttns{
   display: flex;
+  flex-direction: column;
   gap: 10px;
+  width: 200px;
+}
+.game-over-img img {
+  height: 450px;
+}
+#game-over-screen{
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+#game-won-img img {
+  height: 450px;
 }
 
 button{
