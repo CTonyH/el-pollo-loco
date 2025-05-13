@@ -24,10 +24,20 @@
     <script src="levels/level1.js"></script>
     <script src="scripts/game.js"></script>
   </head>
-  <body onload="showStartScreen();">
-    <h1>El Pollo Loco</h1>
-    <div id="start-screen" style="display: block; text-align: center">
-      <div class="start-screen">
+  <body onload="showStartScreen(); checkOrientation();">
+    <div class="content">
+      <div id="rotate-screen"><div id="rotate-message">Rotate your Screen!</div></div>
+
+      <div class="canvas-container">
+        <canvas id="canvas" width="720" height="480"> </canvas>
+        <div id="mute-button" onclick="toggleMute()">
+          <img id="mute-icon" src="./img/logo/volume.png" alt="Sound Icon" />
+        </div>
+        <div>
+          p
+        </div>
+      </div>
+      <div class="overlay" id="start-screen" style="display: block; text-align: center">
         <img
           src="./img/9_intro_outro_screens/start/startscreen_1.png"
           alt="Start Screen"
@@ -35,31 +45,30 @@
           style="width: 100%; max-width: 720px"
         />
         <br />
-        <button onclick="startGame();" id="start-button">🌵 Start Game</button>
-      </div>
-    </div>
-
-    <canvas id="canvas" width="720" height="480"> </canvas>
-
-    <div id="game-over">
-      <div id="game-over-screen" style="display: none; text-align: center; margin-top: 20px">
-        <div class="game-over-img">
-          <img src="./img/You won, you lost/Game Over.png" alt="GameOver" />
-        </div>
-        <div class="endgame-buttns">
-          <button onclick="startGame()" id="restart-button">Restart</button>
-          <button onclick="showStartScreen()" id="menu-button">Hauptmenü</button>
+        <div class="start-bttn">
+          <button onclick="startGame();" id="start-button">🌵 Start Game</button>
         </div>
       </div>
-    </div>
-    <div id="game-won">
-      <div id="game-won-screen" style="display: none; text-align: center; margin-top: 20px">
-        <div id="game-won-img">
-          <img src="./img/You won, you lost/You Win A.png" alt="GameWon" />
+      <div id="game-over">
+        <div id="game-over-screen">
+          <div class="game-over-img">
+            <img src="./img/You won, you lost/Game Over.png" alt="Game Over" />
+          </div>
+          <div class="endgame-buttns">
+            <button onclick="startGame()">Restart</button>
+            <button onclick="showStartScreen()">Hauptmenü</button>
+          </div>
         </div>
-        <div class="endgame-buttns">
-          <button onclick="startGame()" id="restart-button">Restart</button>
-          <button onclick="showStartScreen()" id="menu-button">Hauptmenü</button>
+      </div>
+      <div class="overlay" id="game-won">
+        <div id="game-won-screen" style="display: none; text-align: center; margin-top: 20px">
+          <div id="game-won-img">
+            <img src="./img/You won, you lost/You Win A.png" alt="GameWon" />
+          </div>
+          <div class="endgame-buttns">
+            <button onclick="startGame()" id="restart-button">Restart</button>
+            <button onclick="showStartScreen()" id="menu-button">Hauptmenü</button>
+          </div>
         </div>
       </div>
     </div>

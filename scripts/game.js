@@ -1,6 +1,7 @@
 let canvas;
 let world;
 let keyboard = new Keyboard();
+let isMuted = false;
 
 function init() {
   canvas = document.getElementById("canvas");
@@ -56,15 +57,21 @@ window.addEventListener("keyup", (e) => {
     console.log('Fehler');
     
   document.getElementById('start-screen').style.display = 'none';
+  document.getElementById('game-over').style.display = 'none';
   document.getElementById('canvas').style.display = 'block';
+  document.getElementById("game-over").style.display = "none";
+  document.getElementById("mute-button").style.display = "block";
   bttnDisappear()
   initLevel();
   init();
 }
 
 function showStartScreen() {
-  document.getElementById("start-screen").style.display = "block";
+  document.getElementById("start-screen").style.display = "flex";
+  document.getElementById('game-over').style.display = 'none';
   document.getElementById('canvas').style.display = 'none';
+  document.getElementById("game-over").style.display = "none";
+  document.getElementById("mute-button").style.display = "none";
   bttnDisappear();
 }
 
@@ -74,4 +81,26 @@ function bttnDisappear(){
   document.getElementById('restart-button').style.display = 'none';
   document.getElementById('menu-button').style.display = 'none';
 }
+
+function checkOrientation(){
+  const overlay = document.getElementById('rotate-screen');
+  if (window.innerHeight > window.innerWidth) {
+      overlay.style.display = 'flex';
+  } else {
+    overlay.style.display = 'none';
+  }
+
+  
+}
+
+ function toggleMute() {
+    const icon = document.getElementById('mute-icon');
+    isMuted = !isMuted;
+
+    if (isMuted) {
+      icon.src = './img/logo/mute.png'; 
+    } else {
+      icon.src = './img/logo/volume.png'; 
+    }
+  }
 

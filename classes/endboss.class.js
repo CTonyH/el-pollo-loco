@@ -173,5 +173,6 @@ class Endboss extends MoveableObject {
     document.getElementById("restart-button").style.display = "block";
     document.getElementById("menu-button").style.display = "block";
     document.getElementById("canvas").style.display = "none";
+    document.getElementById("mute-button").style.display = "none";
   }
 }
