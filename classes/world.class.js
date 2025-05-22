@@ -37,6 +37,7 @@ class World {
     this.maxCoins = this.level.coins.length;
     this.maxBottles = this.level.bottles.length;
     this.endboss = this.level.enemies.find((e) => e instanceof Endboss);
+    this.canThrow = true;
   }
 
   setWorld() {
@@ -51,12 +52,17 @@ class World {
   }
 
   checkThrowableObjects() {
-    if (this.keyboard.D && this.char.bottles > 0) {
-      let bottle = new ThrowableObject(this.char.x + 100, this.char.y + 100);
-      this.throwableObjects.push(bottle);
-      this.char.bottles -= 1;
-      this.bottlesBar.setPercentage(this.char.bottles * 10);
-    }
+      if (this.keyboard.D && this.char.bottles > 0 && this.canThrow) {
+        let bottle = new ThrowableObject(this.char.x + 100, this.char.y + 100);
+        this.throwableObjects.push(bottle);
+        this.char.bottles -= 1;
+        this.bottlesBar.setPercentage(this.char.bottles * 10);
+        this.canThrow = false;
+        
+        setInterval(() => {
+          this.canThrow = true;
+        }, 1000);
+      }
   }
 
   checkCollisions() {
@@ -64,12 +70,10 @@ class World {
       if (this.char.isColliding(enemy)) {
         const charBottom = this.char.y + this.char.height;
         const enemyTop = enemy.y;
-         
-        
+
         if (charBottom < enemyTop + 30) {
           enemy.gotHit();
           this.char.speedY = 20;
-          
         } else {
           this.char.hit();
           this.statusBar.setPercentage(this.char.energy);

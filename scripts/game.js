@@ -53,13 +53,11 @@ window.addEventListener("keyup", (e) => {
   }
 });
 
-  function startGame(){
-    console.log('Fehler');
-    
+  function startGame(){    
   document.getElementById('start-screen').style.display = 'none';
   document.getElementById('game-over').style.display = 'none';
   document.getElementById('canvas').style.display = 'block';
-  document.getElementById("game-over").style.display = "none";
+  document.getElementById("game-won").style.display = "none";
   document.getElementById("mute-button").style.display = "block";
   bttnDisappear()
   initLevel();
@@ -70,7 +68,7 @@ function showStartScreen() {
   document.getElementById("start-screen").style.display = "flex";
   document.getElementById('game-over').style.display = 'none';
   document.getElementById('canvas').style.display = 'none';
-  document.getElementById("game-over").style.display = "none";
+  document.getElementById("game-won").style.display = "none";
   document.getElementById("mute-button").style.display = "none";
   bttnDisappear();
 }

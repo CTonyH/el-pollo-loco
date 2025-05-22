@@ -44,6 +44,18 @@ class Char extends MoveableObject {
     "img/2_character_pepe/1_idle/idle/I-9.png",
     "img/2_character_pepe/1_idle/idle/I-10.png",
   ];
+  IMAGES_LONG_IDLE = [
+    'img/2_character_pepe/1_idle/long_idle/I-11.png',
+    'img/2_character_pepe/1_idle/long_idle/I-12.png',
+    'img/2_character_pepe/1_idle/long_idle/I-13.png',
+    'img/2_character_pepe/1_idle/long_idle/I-14.png',
+    'img/2_character_pepe/1_idle/long_idle/I-15.png',
+    'img/2_character_pepe/1_idle/long_idle/I-16.png',
+    'img/2_character_pepe/1_idle/long_idle/I-17.png',
+    'img/2_character_pepe/1_idle/long_idle/I-18.png',
+    'img/2_character_pepe/1_idle/long_idle/I-19.png',
+    'img/2_character_pepe/1_idle/long_idle/I-20.png'
+  ];
 
   world;
   speed = 10;
@@ -69,10 +81,13 @@ class Char extends MoveableObject {
     this.loadImages(this.CHAR_IMAGES_DEAD);
     this.loadImages(this.IMAGES_HURT);
     this.loadImages(this.IMAGES_IDLE);
+    this.loadImages(this.IMAGES_LONG_IDLE);
     this.x = 100;
     this.y = 180;
     this.animate();
     this.applyGravity();
+    this.idleTime = null;
+    this.longIdleDelay = 3000;
   }
 
   getRealFrame(){
@@ -119,14 +134,33 @@ class Char extends MoveableObject {
         });
       } else if (this.isHurt()) {
         this.playAnimation(this.IMAGES_HURT);
+        this.resetIdleTimer()
       } else if (this.isAboveGround()) {
         this.playAnimation(this.IMAGES_JUMPING);
+        this.resetIdleTimer()
       } else if (this.world.keyboard.RIGHT || this.world.keyboard.LEFT) {
         this.playAnimation(this.IMAGES_WALKING);
+        this.resetIdleTimer()
       } else {
-          this.playAnimation(this.IMAGES_IDLE);
+        this.getIdleAnimation();   
       }
     }, 100);
+  }
+
+  resetIdleTimer(){
+    this.idleTime = null;
+  }
+
+  getIdleAnimation(){
+    const now = Date.now();
+    if (!this.idleTime) {
+      this.idleTime = now;
+      this.playAnimation(this.IMAGES_IDLE);
+    } else if (now - this.idleTime >= this.longIdleDelay) {
+      this.playAnimation(this.IMAGES_LONG_IDLE);
+    }else{
+      this.playAnimation(this.IMAGES_IDLE);
+    }
   }
 
   playAnimationOnce(images, onComplete) {
