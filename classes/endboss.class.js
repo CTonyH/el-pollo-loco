@@ -58,16 +58,10 @@ class Endboss extends MoveableObject {
     this.loadImages(this.IMAGES_DEAD);
     this.x = 2800;
     this.y = -400;
-
-    // Add unique ID for debugging
     this.id = "Endboss_" + Date.now();
-
-    // Set initial energy for endboss - DO THIS AFTER super() call
     console.log("Before setting energy, inherited energy is:", this.energy);
     this.energy = 100;
     console.log(`New Endboss created with energy: ${this.energy}, ID: ${this.id}`);
-
-    // Audio for endboss
     this.endbossSfx = new Audio("audio/endboss.mp3");
     this.endbossSfx.volume = 0.5;
     this.endbossSfx.loop = true;
@@ -78,12 +72,10 @@ class Endboss extends MoveableObject {
 
     console.log("Endboss startBehavior - Energy:", this.energy);
 
-    // Stop background music and start endboss music
     if (world && world.stopBackgroundMusic) {
       world.stopBackgroundMusic();
     }
 
-    // Start endboss music
     if (!isMuted) {
       this.endbossSfx.currentTime = 0;
       this.endbossSfx.play().catch((e) => console.log("Endboss audio failed:", e));
@@ -94,8 +86,6 @@ class Endboss extends MoveableObject {
 
       if (Math.abs(distance) > 100) {
         this.playAnimation(this.IMAGES_WALK);
-
-        // Drehrichtung abhängig von Spielerposition
         if (char.x < this.x) {
           this.otherDirection = false;
           this.moveLeft();
@@ -162,13 +152,6 @@ class Endboss extends MoveableObject {
     this.x += 30;
   }
 
-  gotHit() {
-    // Endboss should not be defeated by jumping on him
-    // Only bottles can damage the endboss
-    console.log("Endboss gotHit called - but endboss is immune to jumping");
-    // Do nothing - endboss can only be damaged by bottles
-  }
-
   hit() {
     console.log(`Endboss hit! ID: ${this.id}, Energy before: ${this.energy}`);
     this.energy -= 20;
@@ -183,7 +166,7 @@ class Endboss extends MoveableObject {
   die() {
     this.speed = 0;
     this.stopAnimation();
-    this.stopEndbossSound(); // Stop endboss music when dying
+    this.stopEndbossSound();
     this.playDeathAnimation();
 
     setTimeout(() => {
@@ -213,21 +196,13 @@ class Endboss extends MoveableObject {
 
   gameWonScreen() {
     world.gameWon = true;
-
-    // Stop the entire game
     if (world && world.stopGame) {
       world.stopGame();
     }
-
-    // Stop endboss music when winning
     this.stopEndbossSound();
-
-    // Stop background music too (just in case)
     if (world && world.stopBackgroundMusic) {
       world.stopBackgroundMusic();
     }
-
-    // Play win sound
     if (world && world.playWinSound) {
       world.playWinSound();
     }

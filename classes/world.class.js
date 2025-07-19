@@ -9,12 +9,10 @@ class World {
   bottlesBar = new StatusBar("bottles", 10, 65, 0);
   endbossBar = new EndbossStatusbar();
   throwableObjects = [];
-  // gameOverImage = new Image();
-  // gameWonImage = new Image();
   world;
   gameWon = false;
   gameOver = false;
-  gameRunning = true; // Add flag to control game state
+  gameRunning = true;
   bossTriggerX = 1800;
 
   constructor(canvas, keyboard) {
@@ -24,49 +22,22 @@ class World {
     this.char = new Char(this, keyboard);
     this.lastThrowTime = 0;
     this.level = level1;
-
-    // Audio for coin collection
     this.coinCollectSfx = new Audio("audio/collect-coin.mp3");
     this.coinCollectSfx.volume = 0.4;
-
-    // Audio for game over
     this.gameOverSfx = new Audio("audio/gameover.mp3");
     this.gameOverSfx.volume = 0.5;
-
-    // Audio for background music
     this.backgroundMusic = new Audio("audio/main-menu.mp3");
     this.backgroundMusic.volume = 0.3;
     this.backgroundMusic.loop = true;
-
-    // Audio for win sound
     this.winSfx = new Audio("audio/win.mp3");
     this.winSfx.volume = 0.5;
-
     this.render();
     this.setWorld();
     this.run();
-    // this.gameOverImage.onload = () => {
-    //   this.gameOverImageLoaded = true;
-    // };
-    // this.gameWonImage.onload = () =>{
-    //   this.gameWonImageLoaded = true;
-    // };
-    // this.gameOverImage.src = "./img/9_intro_outro_screens/game_over/game over!.png";
-    // this.gameWonImage.src = "./img/You won, you lost/You Win A.png"
     this.gameOver = false;
     this.maxCoins = this.level.coins.length;
     this.maxBottles = this.level.bottles.length;
     this.endboss = this.level.enemies.find((e) => e instanceof Endboss);
-    console.log("World created - Endboss energy:", this.endboss ? this.endboss.energy : "No endboss found");
-    console.log("World created - Endboss ID:", this.endboss ? this.endboss.id : "No endboss found");
-
-    // Debug: Log all endboss instances in level
-    const allEndbosses = this.level.enemies.filter((e) => e instanceof Endboss);
-    console.log("All Endboss instances in level:", allEndbosses.length);
-    allEndbosses.forEach((boss, index) => {
-      console.log(`Endboss ${index}: ID=${boss.id}, Energy=${boss.energy}`);
-    });
-
     this.canThrow = true;
   }
 
@@ -76,21 +47,21 @@ class World {
 
   run() {
     this.gameLoop = setInterval(() => {
-      if (!this.gameRunning) return; // Stop game loop if game is not running
+      if (!this.gameRunning) return;
       this.checkCollisions();
       this.checkThrowableObjects();
     }, 40);
   }
 
   checkThrowableObjects() {
-    if (!this.gameRunning) return; // Don't allow throwing if game is stopped
+    if (!this.gameRunning) return;
     if (this.keyboard.D && this.char.bottles > 0 && this.canThrow) {
-      let bottle = new ThrowableObject(this.char.x + 100, this.char.y + 100);
+      let throwX = this.char.otherDirection ? this.char.x - 50 : this.char.x + 100;
+      let bottle = new ThrowableObject(throwX, this.char.y + 100, this.char.otherDirection);
       this.throwableObjects.push(bottle);
       this.char.bottles -= 1;
       this.bottlesBar.setPercentage(this.char.bottles * 10);
       this.canThrow = false;
-
       setInterval(() => {
         this.canThrow = true;
       }, 1000);
@@ -98,7 +69,7 @@ class World {
   }
 
   checkCollisions() {
-    if (!this.gameRunning) return; // Stop collision detection if game is not running
+    if (!this.gameRunning) return;
 
     this.level.enemies.forEach((enemy) => {
       if (this.char.isColliding(enemy)) {
@@ -107,13 +78,10 @@ class World {
         const enemyTop = enemy.y;
 
         if (charBottom < enemyTop + 30) {
-          console.log(`Character jumped on: ${enemy.constructor.name}`);
           enemy.gotHit();
           this.char.speedY = 20;
         } else {
-          console.log(`Character hit by: ${enemy.constructor.name}`);
           this.char.hit();
-          this.statusBar.setPercentage(this.char.energy);
         }
       }
     });
@@ -124,8 +92,6 @@ class World {
         const percent = Math.min(100, (this.char.coins / this.maxCoins) * 100);
         this.coinsBar.setPercentage(percent);
         this.level.coins.splice(index, 1);
-
-        // Play coin collection sound
         if (!isMuted) {
           this.coinCollectSfx.currentTime = 0;
           this.coinCollectSfx.play().catch((e) => console.log("Coin collect audio failed:", e));
@@ -144,11 +110,8 @@ class World {
     });
 
     this.throwableObjects.forEach((bottle) => {
-      // Only check collision with the current endboss reference, not all enemies
       if (!bottle.broken && this.endboss && bottle.isColliding(this.endboss)) {
         console.log(`Bottle hit CURRENT endboss! ID: ${this.endboss.id}, Energy: ${this.endboss.energy}`);
-
-        // Double-check that this is actually the current endboss
         const endbossInLevel = this.level.enemies.find((e) => e instanceof Endboss && e.id === this.endboss.id);
         if (endbossInLevel) {
           console.log("Confirmed: This is the current endboss in level");
@@ -164,7 +127,7 @@ class World {
   }
 
   render() {
-    if (!this.gameRunning) return; // Stop rendering if game is not running
+    if (!this.gameRunning) return;
 
     this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
     this.ctx.translate(this.camera_x, 0);
@@ -265,34 +228,24 @@ class World {
   stopGame() {
     console.log("Stopping game completely...");
     this.gameRunning = false;
-
-    // Cancel animation frame
     if (this.animationFrame) {
       cancelAnimationFrame(this.animationFrame);
     }
-
-    // Clear game loop interval
     if (this.gameLoop) {
       clearInterval(this.gameLoop);
     }
-
-    // Stop all character animations and sounds
     if (this.char) {
       if (this.char.animationInterval) clearInterval(this.char.animationInterval);
       if (this.char.movementInterval) clearInterval(this.char.movementInterval);
       this.char.stopWalkSound();
       this.char.stopSnoreSound();
     }
-
-    // Stop all enemy animations
     if (this.level && this.level.enemies) {
       this.level.enemies.forEach((enemy) => {
         if (enemy.animationInterval) clearInterval(enemy.animationInterval);
         if (enemy.stopEndbossSound) enemy.stopEndbossSound();
       });
     }
-
-    // Stop background music
     this.stopBackgroundMusic();
   }
 }

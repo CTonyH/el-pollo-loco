@@ -13,18 +13,16 @@ class MoveableObject extends DrawableObject {
     this.jumpSfx = new Audio("audio/jump.mp3");
     this.hurtSfx = new Audio("audio/damage.mp3");
     this.walkSfx = new Audio("audio/walk.mp3");
-
-    // Audio-Einstellungen
     this.jumpSfx.volume = 0.3;
     this.hurtSfx.volume = 0.4;
     this.walkSfx.volume = 0.2;
-    this.walkSfx.loop = true; // Walk Sound loopen
+    this.walkSfx.loop = true;
 
-    this.isWalking = false; // Walk-Status verfolgen
+    this.isWalking = false; 
   }
 
   applyGravity() {
-    setInterval(() => {
+    this.gravityInterval = setInterval(() => {
       if (this.isAboveGround() || this.speedY > 0) {
         this.y -= this.speedY;
         this.speedY -= this.acceleration;
@@ -50,12 +48,14 @@ class MoveableObject extends DrawableObject {
   }
 
   hit() {
-    console.log("MoveableObject hit() called on:", this.constructor.name);
-    if (this.world.gameWon) return;
+    if (this.world && this.world.gameWon) return;
     const now = new Date().getTime();
     if (now - this.lastHit < 1000) return;
     this.energy -= 10;
     this.lastHit = now;
+    if (this.world && this.world.statusBar) {
+      this.world.statusBar.setPercentage(this.energy);
+    }
 
     if (!isMuted) {
       this.hurtSfx.currentTime = 0;
@@ -65,6 +65,9 @@ class MoveableObject extends DrawableObject {
     if (this.energy <= 0) {
       this.energy = 0;
       this.hurtSfx.pause();
+      if (this.world && this.world.statusBar) {
+        this.world.statusBar.setPercentage(0);
+      }
     } else {
       this.lastHit = new Date().getTime();
     }

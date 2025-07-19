@@ -3,14 +3,28 @@ let world;
 let keyboard = new Keyboard();
 let isMuted = false;
 
+function loadMuteStatus() {
+  const savedMuteStatus = localStorage.getItem("elPolloLocoMuted");
+  if (savedMuteStatus !== null) {
+    isMuted = JSON.parse(savedMuteStatus);
+    updateMuteIcon();
+  }
+}
+
+function updateMuteIcon() {
+  const icon = document.getElementById("mute-icon");
+  if (icon) {
+    icon.src = isMuted ? "./img/logo/mute.png" : "./img/logo/volume.png";
+  }
+}
+
 function init() {
   canvas = document.getElementById("canvas");
   world = new World(canvas, keyboard);
-  // initLevel();
 }
 
 window.addEventListener("keydown", (e) => {
-  if (world?.gameOver || !world?.gameRunning) return; // Check if game is running
+  if (world?.gameOver || !world?.gameRunning) return;
   if (e.keyCode == 39) {
     keyboard.RIGHT = true;
   }
@@ -32,7 +46,7 @@ window.addEventListener("keydown", (e) => {
 });
 
 window.addEventListener("keyup", (e) => {
-  if (world?.gameOver || !world?.gameRunning) return; // Check if game is running
+  if (world?.gameOver || !world?.gameRunning) return;
   if (e.keyCode == 39) {
     keyboard.RIGHT = false;
   }
@@ -53,33 +67,27 @@ window.addEventListener("keyup", (e) => {
   }
 });
 
-// Helper function to stop all sounds
 function stopAllSounds() {
   if (world) {
-    // Stop win sound
     if (world.winSfx) {
       world.winSfx.pause();
       world.winSfx.currentTime = 0;
     }
 
-    // Stop game over sound
     if (world.gameOverSfx) {
       world.gameOverSfx.pause();
       world.gameOverSfx.currentTime = 0;
     }
 
-    // Stop background music
     if (world.stopBackgroundMusic) {
       world.stopBackgroundMusic();
     }
 
-    // Stop character sounds
     if (world.char) {
       if (world.char.stopWalkSound) world.char.stopWalkSound();
       if (world.char.stopSnoreSound) world.char.stopSnoreSound();
     }
 
-    // Stop endboss sound
     if (world.endboss && world.endboss.stopEndbossSound) {
       world.endboss.stopEndbossSound();
     }
@@ -87,20 +95,12 @@ function stopAllSounds() {
 }
 
 function startGame() {
-  // Stop all sounds including win sound
   stopAllSounds();
-
-  // Clear all previous references completely
   if (world) {
-    // Stop all intervals and clear references
     if (world.animationFrameId) {
       cancelAnimationFrame(world.animationFrameId);
     }
-
-    // Clear throwable objects that might reference old endboss
     world.throwableObjects = [];
-
-    // Clear level enemies
     if (world.level && world.level.enemies) {
       world.level.enemies.forEach((enemy) => {
         if (enemy.animationInterval) clearInterval(enemy.animationInterval);
@@ -111,29 +111,13 @@ function startGame() {
 
     world = null;
   }
-
-  // Also clear global level1
   if (typeof level1 !== "undefined") {
     level1 = null;
   }
-
-  document.getElementById("start-screen").style.display = "none";
-  document.getElementById("game-over").style.display = "none";
-  document.getElementById("canvas").style.display = "block";
-  document.getElementById("game-won").style.display = "none";
-  document.getElementById("mute-button").style.display = "block";
-
-  // Touch Controls anzeigen (nur auf Mobile)
-  const touchControls = document.getElementById("touch-controls");
-  if (touchControls && window.innerWidth <= 720) {
-    touchControls.style.display = "block";
-  }
-
+  setStyles();
   bttnDisappear();
-  initLevel(); // Create fresh level with new endboss
-  init(); // Create new world that uses the fresh level
-
-  // Start background music after world is initialized
+  initLevel();
+  init();
   setTimeout(() => {
     if (world && world.startBackgroundMusic && !isMuted) {
       world.startBackgroundMusic();
@@ -141,15 +125,19 @@ function startGame() {
   }, 100);
 }
 
-function showStartScreen() {
-  // Stop all sounds including win sound
-  stopAllSounds();
-
-  // Stop game completely
-  if (world && world.stopGame) {
-    world.stopGame();
+function setStylesStartGame() {
+  document.getElementById("start-screen").style.display = "none";
+  document.getElementById("game-over").style.display = "none";
+  document.getElementById("canvas").style.display = "block";
+  document.getElementById("game-won").style.display = "none";
+  document.getElementById("mute-button").style.display = "block";
+  const touchControls = document.getElementById("touch-controls");
+  if (touchControls && window.innerWidth <= 720) {
+    touchControls.style.display = "block";
   }
+}
 
+function setStylesStartScreen() {
   if (window.innerWidth >= 1024) {
     document.getElementById("start-screen").style.display = "flex";
     document.getElementById("controls-info").style.display = "block";
@@ -160,14 +148,20 @@ function showStartScreen() {
   document.getElementById("canvas").style.display = "none";
   document.getElementById("game-won").style.display = "none";
   document.getElementById("mute-button").style.display = "block";
-
-  // Touch Controls verstecken im Hauptmenü
+  updateMuteIcon();
   const touchControls = document.getElementById("touch-infos");
 
   if (touchControls) {
     touchControls.style.display = "none";
   }
+}
 
+function showStartScreen() {
+  stopAllSounds();
+  if (world && world.stopGame) {
+    world.stopGame();
+  }
+  setStylesStartScreen();
   bttnDisappear();
 }
 
@@ -186,33 +180,30 @@ function checkOrientation() {
     overlay.style.display = "none";
   }
 }
-
-// Event Listener für Orientierungsänderungen hinzufügen
 window.addEventListener("resize", checkOrientation);
 window.addEventListener("orientationchange", function () {
-  // Kleine Verzögerung, da orientationchange manchmal vor dem tatsächlichen Resize feuert
   setTimeout(checkOrientation, 100);
 });
 
 function toggleMute() {
   const icon = document.getElementById("mute-icon");
   isMuted = !isMuted;
+  localStorage.setItem("elPolloLocoMuted", JSON.stringify(isMuted));
 
   if (isMuted) {
     icon.src = "./img/logo/mute.png";
-    // Stop all sounds when muting
     stopAllSounds();
+    if (world && world.char) {
+      world.char.stopWalkSound();
+      if (world.char.stopSnoreSound) world.char.stopSnoreSound();
+    }
   } else {
     icon.src = "./img/logo/volume.png";
-
-    // Resume appropriate music based on game state
     if (world && !world.gameOver && !world.gameWon && world.gameRunning) {
-      // If endboss is active and has behavior started, play endboss music
       if (world.endboss && world.bossBehaviorStarted) {
         world.endboss.endbossSfx.currentTime = 0;
         world.endboss.endbossSfx.play().catch((e) => console.log("Endboss audio failed:", e));
       } else {
-        // Otherwise play background music
         world.startBackgroundMusic();
       }
     }
@@ -242,17 +233,11 @@ function toggleControls() {
   }
 }
 
-// Touch Controls für Mobile
 function initTouchControls() {
-  // D-Pad Buttons
   const touchLeft = document.getElementById("touch-left");
   const touchRight = document.getElementById("touch-right");
-
-  // Action Buttons
   const touchThrow = document.getElementById("touch-throw");
   const touchAttack = document.getElementById("touch-attack");
-
-  // Touch Start Events (Button gedrückt)
   touchLeft.addEventListener("touchstart", (e) => {
     e.preventDefault();
     keyboard.LEFT = true;
@@ -273,7 +258,6 @@ function initTouchControls() {
     keyboard.SPACE = true;
   });
 
-  // Touch End Events (Button losgelassen)
   touchLeft.addEventListener("touchend", (e) => {
     e.preventDefault();
     keyboard.LEFT = false;
@@ -294,11 +278,9 @@ function initTouchControls() {
     keyboard.SPACE = false;
   });
 
-  // Touch Cancel Events (für den Fall, dass Touch unterbrochen wird)
   [touchLeft, touchRight, touchThrow, touchAttack].forEach((button) => {
     button.addEventListener("touchcancel", (e) => {
       e.preventDefault();
-      // Alle Tasten loslassen
       keyboard.LEFT = false;
       keyboard.RIGHT = false;
       keyboard.D = false;
@@ -306,15 +288,14 @@ function initTouchControls() {
     });
   });
 }
-
-// Touch Controls initialisieren wenn die Seite geladen ist
-document.addEventListener("DOMContentLoaded", initTouchControls);
+document.addEventListener("DOMContentLoaded", function () {
+  initTouchControls();
+  loadMuteStatus();
+});
 
 function showGameOver() {
   document.getElementById("game-over").style.display = "block";
   document.getElementById("game-over-screen").style.display = "flex";
-
-  // Touch Controls verstecken bei Game Over
   const touchControls = document.getElementById("touch-controls");
   if (touchControls) {
     touchControls.style.display = "none";
@@ -324,8 +305,6 @@ function showGameOver() {
 function showGameWon() {
   document.getElementById("game-won").style.display = "block";
   document.getElementById("game-won-screen").style.display = "flex";
-
-  // Touch Controls verstecken bei Game Won
   const touchControls = document.getElementById("touch-controls");
   if (touchControls) {
     touchControls.style.display = "none";

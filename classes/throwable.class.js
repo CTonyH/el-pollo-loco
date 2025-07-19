@@ -24,8 +24,7 @@ class ThrowableObject extends MoveableObject {
     this.height = 100;
     this.broken = false;
     this.otherDirection = direction;
-
-    // Add bottle sounds
+    this.throwDirection = direction; 
     this.throwSfx = new Audio("audio/bottle-throw.mp3");
     this.breakSfx = new Audio("audio/bottle-broke.mp3");
     this.throwSfx.volume = 0.4;
@@ -36,7 +35,6 @@ class ThrowableObject extends MoveableObject {
   }
 
   throw() {
-    // Play throw sound
     if (!isMuted) {
       this.throwSfx.currentTime = 0;
       this.throwSfx.play().catch((e) => console.log("Bottle throw audio failed:", e));
@@ -46,8 +44,10 @@ class ThrowableObject extends MoveableObject {
     this.acceleration = 0.5;
     this.applyGravity();
 
+
+    let throwSpeed = this.throwDirection ? -10 : 10;
     this.throwInterval = setInterval(() => {
-      this.x += 10;
+      this.x += throwSpeed;
     }, 25);
   }
 
@@ -61,8 +61,6 @@ class ThrowableObject extends MoveableObject {
 
   break() {
     this.broken = true;
-
-    // Play break sound
     if (!isMuted) {
       this.breakSfx.currentTime = 0;
       this.breakSfx.play().catch((e) => console.log("Bottle break audio failed:", e));
@@ -90,5 +88,12 @@ class ThrowableObject extends MoveableObject {
     if (this.y >= 320 && !this.broken) {
       this.break();
     }
+  }
+
+  isOutOfBounds() {
+    let cameraX = world ? world.camera_x : 0;
+    let leftBound = cameraX - 200;
+    let rightBound = cameraX + 720 + 200;
+    return this.x < leftBound || this.x > rightBound;
   }
 }

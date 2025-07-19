@@ -82,8 +82,6 @@ class Char extends MoveableObject {
     this.loadImages(this.IMAGES_HURT);
     this.loadImages(this.IMAGES_IDLE);
     this.loadImages(this.IMAGES_LONG_IDLE);
-
-    // Add snore sound for long idle animation
     this.snoreSfx = new Audio("audio/snore.mp3");
     this.snoreSfx.volume = 0.3;
     this.snoreSfx.loop = true;
@@ -112,11 +110,8 @@ class Char extends MoveableObject {
 
   animate() {
     this.movementInterval = setInterval(() => {
-      // Stop movement if game is not running
       if (!this.world.gameRunning) return;
-
       let isMoving = false;
-
       if (this.world.keyboard.RIGHT && this.x < this.world.level.level_end_x) {
         this.moveRight();
         isMoving = true;
@@ -125,8 +120,6 @@ class Char extends MoveableObject {
         this.moveLeft(this.mirrow);
         isMoving = true;
       }
-
-      // Control walk sound based on movement
       if (isMoving && !this.isAboveGround()) {
         this.startWalkSound();
       } else {
@@ -136,14 +129,11 @@ class Char extends MoveableObject {
       if (this.world.keyboard.SPACE && !this.isAboveGround()) {
         this.jump();
       }
-
       this.world.camera_x = -this.x + 100;
     }, 1000 / 60);
 
     this.animationInterval = setInterval(() => {
-      // Stop animation if game is not running
       if (!this.world.gameRunning) return;
-
       if (this.isDead() && !this.deadAnimationPlayed) {
         this.deadAnimationPlayed = true;
         clearInterval(this.animationInterval);
@@ -168,8 +158,19 @@ class Char extends MoveableObject {
   }
 
   resetIdleTimer() {
+    this.lastMovement = new Date().getTime();
     this.idleTime = null;
-    this.stopSnoreSound(); // Stop snore when resetting idle timer
+  }
+
+  triggerDeathAnimation() {
+    if (this.deadAnimationPlayed) return;
+    this.deadAnimationPlayed = true;
+    clearInterval(this.animationInterval);
+    clearInterval(this.movementInterval);
+    this.playAnimationOnce(this.CHAR_IMAGES_DEAD, () => {
+      this.visible = false;
+      this.gameOverScreen();
+    });
   }
 
   getIdleAnimation() {
@@ -177,13 +178,13 @@ class Char extends MoveableObject {
     if (!this.idleTime) {
       this.idleTime = now;
       this.playAnimation(this.IMAGES_IDLE);
-      this.stopSnoreSound(); // Stop snore when starting idle
+      this.stopSnoreSound(); 
     } else if (now - this.idleTime >= this.longIdleDelay) {
       this.playAnimation(this.IMAGES_LONG_IDLE);
-      this.startSnoreSound(); // Start snore for long idle
+      this.startSnoreSound();
     } else {
       this.playAnimation(this.IMAGES_IDLE);
-      this.stopSnoreSound(); // Stop snore for normal idle
+      this.stopSnoreSound();
     }
   }
 
@@ -218,20 +219,13 @@ class Char extends MoveableObject {
   }
 
   gameOverScreen() {
-    // Stop the entire game
     if (this.world && this.world.stopGame) {
       this.world.stopGame();
     }
-
-    // Stop snore sound when game over
     this.stopSnoreSound();
-
-    // Play game over sound
     if (this.world && this.world.playGameOverSound) {
       this.world.playGameOverSound();
     }
-
-    // Stop background music
     if (this.world && this.world.stopBackgroundMusic) {
       this.world.stopBackgroundMusic();
     }
