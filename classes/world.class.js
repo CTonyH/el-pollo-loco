@@ -22,6 +22,24 @@ class World {
     this.char = new Char(this, keyboard);
     this.lastThrowTime = 0;
     this.level = level1;
+
+    // Audio for coin collection
+    this.coinCollectSfx = new Audio("audio/collect-coin.mp3");
+    this.coinCollectSfx.volume = 0.4;
+
+    // Audio for game over
+    this.gameOverSfx = new Audio("audio/gameover.mp3");
+    this.gameOverSfx.volume = 0.5;
+
+    // Audio for background music
+    this.backgroundMusic = new Audio("audio/main-menu.mp3");
+    this.backgroundMusic.volume = 0.3;
+    this.backgroundMusic.loop = true;
+
+    // Audio for win sound
+    this.winSfx = new Audio("audio/win.mp3");
+    this.winSfx.volume = 0.5;
+
     this.render();
     this.setWorld();
     this.run();
@@ -37,6 +55,16 @@ class World {
     this.maxCoins = this.level.coins.length;
     this.maxBottles = this.level.bottles.length;
     this.endboss = this.level.enemies.find((e) => e instanceof Endboss);
+    console.log("World created - Endboss energy:", this.endboss ? this.endboss.energy : "No endboss found");
+    console.log("World created - Endboss ID:", this.endboss ? this.endboss.id : "No endboss found");
+
+    // Debug: Log all endboss instances in level
+    const allEndbosses = this.level.enemies.filter((e) => e instanceof Endboss);
+    console.log("All Endboss instances in level:", allEndbosses.length);
+    allEndbosses.forEach((boss, index) => {
+      console.log(`Endboss ${index}: ID=${boss.id}, Energy=${boss.energy}`);
+    });
+
     this.canThrow = true;
   }
 
@@ -52,29 +80,32 @@ class World {
   }
 
   checkThrowableObjects() {
-      if (this.keyboard.D && this.char.bottles > 0 && this.canThrow) {
-        let bottle = new ThrowableObject(this.char.x + 100, this.char.y + 100);
-        this.throwableObjects.push(bottle);
-        this.char.bottles -= 1;
-        this.bottlesBar.setPercentage(this.char.bottles * 10);
-        this.canThrow = false;
-        
-        setInterval(() => {
-          this.canThrow = true;
-        }, 1000);
-      }
+    if (this.keyboard.D && this.char.bottles > 0 && this.canThrow) {
+      let bottle = new ThrowableObject(this.char.x + 100, this.char.y + 100);
+      this.throwableObjects.push(bottle);
+      this.char.bottles -= 1;
+      this.bottlesBar.setPercentage(this.char.bottles * 10);
+      this.canThrow = false;
+
+      setInterval(() => {
+        this.canThrow = true;
+      }, 1000);
+    }
   }
 
   checkCollisions() {
     this.level.enemies.forEach((enemy) => {
       if (this.char.isColliding(enemy)) {
+        console.log(`Character colliding with: ${enemy.constructor.name}`);
         const charBottom = this.char.y + this.char.height;
         const enemyTop = enemy.y;
 
         if (charBottom < enemyTop + 30) {
+          console.log(`Character jumped on: ${enemy.constructor.name}`);
           enemy.gotHit();
           this.char.speedY = 20;
         } else {
+          console.log(`Character hit by: ${enemy.constructor.name}`);
           this.char.hit();
           this.statusBar.setPercentage(this.char.energy);
         }
@@ -87,6 +118,12 @@ class World {
         const percent = Math.min(100, (this.char.coins / this.maxCoins) * 100);
         this.coinsBar.setPercentage(percent);
         this.level.coins.splice(index, 1);
+
+        // Play coin collection sound
+        if (!isMuted) {
+          this.coinCollectSfx.currentTime = 0;
+          this.coinCollectSfx.play().catch((e) => console.log("Coin collect audio failed:", e));
+        }
       }
     });
 
@@ -101,10 +138,21 @@ class World {
     });
 
     this.throwableObjects.forEach((bottle) => {
+      // Only check collision with the current endboss reference, not all enemies
       if (!bottle.broken && this.endboss && bottle.isColliding(this.endboss)) {
-        bottle.break();
-        this.endboss.hit();
-        this.endbossBar.setPercentage(this.endboss.energy);
+        console.log(`Bottle hit CURRENT endboss! ID: ${this.endboss.id}, Energy: ${this.endboss.energy}`);
+
+        // Double-check that this is actually the current endboss
+        const endbossInLevel = this.level.enemies.find((e) => e instanceof Endboss && e.id === this.endboss.id);
+        if (endbossInLevel) {
+          console.log("Confirmed: This is the current endboss in level");
+          bottle.break();
+          this.endboss.hit();
+          this.endbossBar.setPercentage(this.endboss.energy);
+          console.log(`Endboss energy after hit: ${this.endboss.energy}`);
+        } else {
+          console.log("ERROR: Bottle hit old endboss reference!");
+        }
       }
     });
   }
@@ -165,6 +213,32 @@ class World {
     mo.drawFramework(this.ctx);
     if (mo.otherDirection) {
       this.flipImageBack(mo);
+    }
+  }
+
+  startBackgroundMusic() {
+    if (!isMuted) {
+      this.backgroundMusic.currentTime = 0;
+      this.backgroundMusic.play().catch((e) => console.log("Background music failed:", e));
+    }
+  }
+
+  stopBackgroundMusic() {
+    this.backgroundMusic.pause();
+    this.backgroundMusic.currentTime = 0;
+  }
+
+  playGameOverSound() {
+    if (!isMuted) {
+      this.gameOverSfx.currentTime = 0;
+      this.gameOverSfx.play().catch((e) => console.log("Game over audio failed:", e));
+    }
+  }
+
+  playWinSound() {
+    if (!isMuted) {
+      this.winSfx.currentTime = 0;
+      this.winSfx.play().catch((e) => console.log("Win audio failed:", e));
     }
   }
 

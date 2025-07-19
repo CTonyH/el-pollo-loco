@@ -45,16 +45,16 @@ class Char extends MoveableObject {
     "img/2_character_pepe/1_idle/idle/I-10.png",
   ];
   IMAGES_LONG_IDLE = [
-    'img/2_character_pepe/1_idle/long_idle/I-11.png',
-    'img/2_character_pepe/1_idle/long_idle/I-12.png',
-    'img/2_character_pepe/1_idle/long_idle/I-13.png',
-    'img/2_character_pepe/1_idle/long_idle/I-14.png',
-    'img/2_character_pepe/1_idle/long_idle/I-15.png',
-    'img/2_character_pepe/1_idle/long_idle/I-16.png',
-    'img/2_character_pepe/1_idle/long_idle/I-17.png',
-    'img/2_character_pepe/1_idle/long_idle/I-18.png',
-    'img/2_character_pepe/1_idle/long_idle/I-19.png',
-    'img/2_character_pepe/1_idle/long_idle/I-20.png'
+    "img/2_character_pepe/1_idle/long_idle/I-11.png",
+    "img/2_character_pepe/1_idle/long_idle/I-12.png",
+    "img/2_character_pepe/1_idle/long_idle/I-13.png",
+    "img/2_character_pepe/1_idle/long_idle/I-14.png",
+    "img/2_character_pepe/1_idle/long_idle/I-15.png",
+    "img/2_character_pepe/1_idle/long_idle/I-16.png",
+    "img/2_character_pepe/1_idle/long_idle/I-17.png",
+    "img/2_character_pepe/1_idle/long_idle/I-18.png",
+    "img/2_character_pepe/1_idle/long_idle/I-19.png",
+    "img/2_character_pepe/1_idle/long_idle/I-20.png",
   ];
 
   world;
@@ -63,25 +63,32 @@ class Char extends MoveableObject {
   rY;
   rW;
   rH;
-  
+
   offset = {
     top: 70,
     right: 30,
     bottom: 10,
-    left: 20
+    left: 20,
   };
   lastHit = 0;
 
   constructor(world, keyboard) {
     super().loadImage("img/2_character_pepe/1_idle/idle/I-1.png", 100, 200);
     this.world = world;
-    this.keyboard = keyboard
+    this.keyboard = keyboard;
     this.loadImages(this.IMAGES_WALKING);
     this.loadImages(this.IMAGES_JUMPING);
     this.loadImages(this.CHAR_IMAGES_DEAD);
     this.loadImages(this.IMAGES_HURT);
     this.loadImages(this.IMAGES_IDLE);
     this.loadImages(this.IMAGES_LONG_IDLE);
+
+    // Add snore sound for long idle animation
+    this.snoreSfx = new Audio("audio/snore.mp3");
+    this.snoreSfx.volume = 0.3;
+    this.snoreSfx.loop = true;
+    this.isSnoring = false;
+
     this.x = 100;
     this.y = 180;
     this.animate();
@@ -90,30 +97,37 @@ class Char extends MoveableObject {
     this.longIdleDelay = 3000;
   }
 
-  getRealFrame(){
+  getRealFrame() {
     this.rX = this.x + this.offset.left;
     this.rY = this.y + this.offset.top;
     this.rW = this.width - this.offset.left - this.offset.right;
-    this.rH = this.height - this.offset.top - this.offset.bottom; 
-  };
+    this.rH = this.height - this.offset.top - this.offset.bottom;
+  }
 
-  draw(ctx){
+  draw(ctx) {
     this.getRealFrame();
     super.draw(ctx);
     this.drawFramework(ctx);
   }
 
   animate() {
- 
     setInterval(() => {
+      let isMoving = false;
+
       if (this.world.keyboard.RIGHT && this.x < this.world.level.level_end_x) {
         this.moveRight();
-
-        // this.walking_sound.play();
+        isMoving = true;
       }
       if (this.world.keyboard.LEFT && this.x > 0) {
         this.moveLeft(this.mirrow);
-        // this.walking_sound.play();
+        isMoving = true;
+      }
+
+      // Control walk sound based on movement
+      if (isMoving && !this.isAboveGround()) {
+        this.startWalkSound();
+      } else {
+        this.stopWalkSound();
       }
 
       if (this.world.keyboard.SPACE && !this.isAboveGround()) {
@@ -134,32 +148,36 @@ class Char extends MoveableObject {
         });
       } else if (this.isHurt()) {
         this.playAnimation(this.IMAGES_HURT);
-        this.resetIdleTimer()
+        this.resetIdleTimer();
       } else if (this.isAboveGround()) {
         this.playAnimation(this.IMAGES_JUMPING);
-        this.resetIdleTimer()
+        this.resetIdleTimer();
       } else if (this.world.keyboard.RIGHT || this.world.keyboard.LEFT) {
         this.playAnimation(this.IMAGES_WALKING);
-        this.resetIdleTimer()
+        this.resetIdleTimer();
       } else {
-        this.getIdleAnimation();   
+        this.getIdleAnimation();
       }
     }, 100);
   }
 
-  resetIdleTimer(){
+  resetIdleTimer() {
     this.idleTime = null;
+    this.stopSnoreSound(); // Stop snore when resetting idle timer
   }
 
-  getIdleAnimation(){
+  getIdleAnimation() {
     const now = Date.now();
     if (!this.idleTime) {
       this.idleTime = now;
       this.playAnimation(this.IMAGES_IDLE);
+      this.stopSnoreSound(); // Stop snore when starting idle
     } else if (now - this.idleTime >= this.longIdleDelay) {
       this.playAnimation(this.IMAGES_LONG_IDLE);
-    }else{
+      this.startSnoreSound(); // Start snore for long idle
+    } else {
       this.playAnimation(this.IMAGES_IDLE);
+      this.stopSnoreSound(); // Stop snore for normal idle
     }
   }
 
@@ -177,12 +195,40 @@ class Char extends MoveableObject {
     }, 100);
   }
 
+  startSnoreSound() {
+    if (!this.isSnoring && !isMuted) {
+      this.isSnoring = true;
+      this.snoreSfx.currentTime = 0;
+      this.snoreSfx.play().catch((e) => console.log("Snore audio failed:", e));
+    }
+  }
+
+  stopSnoreSound() {
+    if (this.isSnoring) {
+      this.isSnoring = false;
+      this.snoreSfx.pause();
+      this.snoreSfx.currentTime = 0;
+    }
+  }
+
   gameOverScreen() {
-    document.getElementById("game-over").style.display = "block";
-    document.getElementById("game-over-screen").style.display = "flex";
+    // Stop snore sound when game over
+    this.stopSnoreSound();
+
+    // Play game over sound
+    if (this.world && this.world.playGameOverSound) {
+      this.world.playGameOverSound();
+    }
+
+    // Stop background music
+    if (this.world && this.world.stopBackgroundMusic) {
+      this.world.stopBackgroundMusic();
+    }
+
+    showGameOver();
     document.getElementById("restart-button").style.display = "block";
     document.getElementById("menu-button").style.display = "block";
-    document.getElementById('canvas').style.display = 'none';
+    document.getElementById("canvas").style.display = "none";
     document.getElementById("mute-button").style.display = "none";
   }
 }
