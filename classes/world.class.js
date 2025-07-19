@@ -13,6 +13,8 @@ class World {
   // gameWonImage = new Image();
   world;
   gameWon = false;
+  gameOver = false;
+  gameRunning = true; // Add flag to control game state
   bossTriggerX = 1800;
 
   constructor(canvas, keyboard) {
@@ -73,13 +75,15 @@ class World {
   }
 
   run() {
-    setInterval(() => {
+    this.gameLoop = setInterval(() => {
+      if (!this.gameRunning) return; // Stop game loop if game is not running
       this.checkCollisions();
       this.checkThrowableObjects();
     }, 40);
   }
 
   checkThrowableObjects() {
+    if (!this.gameRunning) return; // Don't allow throwing if game is stopped
     if (this.keyboard.D && this.char.bottles > 0 && this.canThrow) {
       let bottle = new ThrowableObject(this.char.x + 100, this.char.y + 100);
       this.throwableObjects.push(bottle);
@@ -94,6 +98,8 @@ class World {
   }
 
   checkCollisions() {
+    if (!this.gameRunning) return; // Stop collision detection if game is not running
+
     this.level.enemies.forEach((enemy) => {
       if (this.char.isColliding(enemy)) {
         console.log(`Character colliding with: ${enemy.constructor.name}`);
@@ -158,6 +164,8 @@ class World {
   }
 
   render() {
+    if (!this.gameRunning) return; // Stop rendering if game is not running
+
     this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
     this.ctx.translate(this.camera_x, 0);
     this.addObjectsToMap(this.level.backgroundObjects);
@@ -194,7 +202,7 @@ class World {
     });
     this.ctx.translate(-this.camera_x, 0);
     let self = this;
-    requestAnimationFrame(function () {
+    this.animationFrame = requestAnimationFrame(function () {
       self.render();
     });
   }
@@ -252,5 +260,39 @@ class World {
   flipImageBack(mo) {
     mo.x = mo.x * -1;
     this.ctx.restore();
+  }
+
+  stopGame() {
+    console.log("Stopping game completely...");
+    this.gameRunning = false;
+
+    // Cancel animation frame
+    if (this.animationFrame) {
+      cancelAnimationFrame(this.animationFrame);
+    }
+
+    // Clear game loop interval
+    if (this.gameLoop) {
+      clearInterval(this.gameLoop);
+    }
+
+    // Stop all character animations and sounds
+    if (this.char) {
+      if (this.char.animationInterval) clearInterval(this.char.animationInterval);
+      if (this.char.movementInterval) clearInterval(this.char.movementInterval);
+      this.char.stopWalkSound();
+      this.char.stopSnoreSound();
+    }
+
+    // Stop all enemy animations
+    if (this.level && this.level.enemies) {
+      this.level.enemies.forEach((enemy) => {
+        if (enemy.animationInterval) clearInterval(enemy.animationInterval);
+        if (enemy.stopEndbossSound) enemy.stopEndbossSound();
+      });
+    }
+
+    // Stop background music
+    this.stopBackgroundMusic();
   }
 }

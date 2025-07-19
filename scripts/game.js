@@ -10,7 +10,7 @@ function init() {
 }
 
 window.addEventListener("keydown", (e) => {
-  if (world?.gameOver) return;
+  if (world?.gameOver || !world?.gameRunning) return; // Check if game is running
   if (e.keyCode == 39) {
     keyboard.RIGHT = true;
   }
@@ -32,7 +32,7 @@ window.addEventListener("keydown", (e) => {
 });
 
 window.addEventListener("keyup", (e) => {
-  if (world?.gameOver) return;
+  if (world?.gameOver || !world?.gameRunning) return; // Check if game is running
   if (e.keyCode == 39) {
     keyboard.RIGHT = false;
   }
@@ -53,7 +53,43 @@ window.addEventListener("keyup", (e) => {
   }
 });
 
+// Helper function to stop all sounds
+function stopAllSounds() {
+  if (world) {
+    // Stop win sound
+    if (world.winSfx) {
+      world.winSfx.pause();
+      world.winSfx.currentTime = 0;
+    }
+
+    // Stop game over sound
+    if (world.gameOverSfx) {
+      world.gameOverSfx.pause();
+      world.gameOverSfx.currentTime = 0;
+    }
+
+    // Stop background music
+    if (world.stopBackgroundMusic) {
+      world.stopBackgroundMusic();
+    }
+
+    // Stop character sounds
+    if (world.char) {
+      if (world.char.stopWalkSound) world.char.stopWalkSound();
+      if (world.char.stopSnoreSound) world.char.stopSnoreSound();
+    }
+
+    // Stop endboss sound
+    if (world.endboss && world.endboss.stopEndbossSound) {
+      world.endboss.stopEndbossSound();
+    }
+  }
+}
+
 function startGame() {
+  // Stop all sounds including win sound
+  stopAllSounds();
+
   // Clear all previous references completely
   if (world) {
     // Stop all intervals and clear references
@@ -106,6 +142,14 @@ function startGame() {
 }
 
 function showStartScreen() {
+  // Stop all sounds including win sound
+  stopAllSounds();
+
+  // Stop game completely
+  if (world && world.stopGame) {
+    world.stopGame();
+  }
+
   if (window.innerWidth >= 1024) {
     document.getElementById("start-screen").style.display = "flex";
     document.getElementById("controls-info").style.display = "block";
@@ -156,35 +200,21 @@ function toggleMute() {
 
   if (isMuted) {
     icon.src = "./img/logo/mute.png";
-
-    // Stop all currently playing sounds
-    if (world) {
-      // Stop background music
-      if (world.stopBackgroundMusic) {
-        world.stopBackgroundMusic();
-      }
-
-      // Stop character sounds
-      if (world.char) {
-        if (world.char.isWalking) {
-          world.char.stopWalkSound();
-        }
-        if (world.char.isSnoring) {
-          world.char.stopSnoreSound();
-        }
-      }
-
-      // Stop endboss sound
-      if (world.endboss && world.endboss.stopEndbossSound) {
-        world.endboss.stopEndbossSound();
-      }
-    }
+    // Stop all sounds when muting
+    stopAllSounds();
   } else {
     icon.src = "./img/logo/volume.png";
 
-    // Resume background music if game is running
-    if (world && world.startBackgroundMusic && !world.gameOver && !world.gameWon) {
-      world.startBackgroundMusic();
+    // Resume appropriate music based on game state
+    if (world && !world.gameOver && !world.gameWon && world.gameRunning) {
+      // If endboss is active and has behavior started, play endboss music
+      if (world.endboss && world.bossBehaviorStarted) {
+        world.endboss.endbossSfx.currentTime = 0;
+        world.endboss.endbossSfx.play().catch((e) => console.log("Endboss audio failed:", e));
+      } else {
+        // Otherwise play background music
+        world.startBackgroundMusic();
+      }
     }
   }
 }

@@ -111,7 +111,10 @@ class Char extends MoveableObject {
   }
 
   animate() {
-    setInterval(() => {
+    this.movementInterval = setInterval(() => {
+      // Stop movement if game is not running
+      if (!this.world.gameRunning) return;
+
       let isMoving = false;
 
       if (this.world.keyboard.RIGHT && this.x < this.world.level.level_end_x) {
@@ -138,6 +141,9 @@ class Char extends MoveableObject {
     }, 1000 / 60);
 
     this.animationInterval = setInterval(() => {
+      // Stop animation if game is not running
+      if (!this.world.gameRunning) return;
+
       if (this.isDead() && !this.deadAnimationPlayed) {
         this.deadAnimationPlayed = true;
         clearInterval(this.animationInterval);
@@ -212,6 +218,11 @@ class Char extends MoveableObject {
   }
 
   gameOverScreen() {
+    // Stop the entire game
+    if (this.world && this.world.stopGame) {
+      this.world.stopGame();
+    }
+
     // Stop snore sound when game over
     this.stopSnoreSound();
 

@@ -78,6 +78,11 @@ class Endboss extends MoveableObject {
 
     console.log("Endboss startBehavior - Energy:", this.energy);
 
+    // Stop background music and start endboss music
+    if (world && world.stopBackgroundMusic) {
+      world.stopBackgroundMusic();
+    }
+
     // Start endboss music
     if (!isMuted) {
       this.endbossSfx.currentTime = 0;
@@ -208,6 +213,11 @@ class Endboss extends MoveableObject {
 
   gameWonScreen() {
     world.gameWon = true;
+
+    // Stop the entire game
+    if (world && world.stopGame) {
+      world.stopGame();
+    }
 
     // Stop endboss music when winning
     this.stopEndbossSound();
