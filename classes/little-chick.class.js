@@ -12,6 +12,13 @@ class Chick extends MoveableObject {
   IMAGES_CHICK_DEAD = ["img/3_enemies_chicken/chicken_small/2_dead/dead.png"];
   enemy;
 
+  offset = {
+    top: 2,
+    right: 5,
+    bottom: 5,
+    left: 3,
+  };
+
   constructor() {
     super().loadImage("img/3_enemies_chicken/chicken_small/1_walk/1_w.png");
     this.loadImages(this.IMAGES_CHICK_WALK);
@@ -20,6 +27,19 @@ class Chick extends MoveableObject {
     this.y = 380;
     this.speed = 0.15 + Math.random() * 1;
     this.animate();
+  }
+
+  getRealFrame() {
+    this.rX = this.x + this.offset.left;
+    this.rY = this.y + this.offset.top;
+    this.rW = this.width - this.offset.left - this.offset.right;
+    this.rH = this.height - this.offset.top - this.offset.bottom;
+  }
+
+  draw(ctx) {
+    this.getRealFrame();
+    super.draw(ctx);
+    this.drawFramework(ctx);
   }
 
   animate() {

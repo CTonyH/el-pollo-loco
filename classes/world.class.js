@@ -109,20 +109,49 @@ class World {
   }
 
   checkEnemyCollisions() {
-    this.level.enemies.forEach((enemy) => {
-      if (this.char.isColliding(enemy)) {
-        console.log(`Character colliding with: ${enemy.constructor.name}`);
-        const charBottom = this.char.y + this.char.height;
-        const enemyTop = enemy.y;
+    const collidingEnemies = this.getCollidingEnemies();
+    if (collidingEnemies.length === 0) return;
 
-        if (charBottom < enemyTop + 30) {
-          enemy.gotHit();
-          this.char.speedY = 20;
-        } else {
-          this.char.hit();
-        }
+    const jumpKill = this.attemptJumpKill(collidingEnemies);
+    if (!jumpKill) {
+      this.char.hit();
+      this.statusBar.setPercentage(this.char.energy);
+    }
+  }
+
+  getCollidingEnemies() {
+    return this.level.enemies.filter((enemy) => this.char.isColliding(enemy) && !enemy.defeated);
+  }
+
+  attemptJumpKill(enemies) {
+    const charData = this.getCharacterData();
+
+    for (let enemy of enemies) {
+      if (this.isValidJumpKill(enemy, charData)) {
+        enemy.gotHit();
+        this.char.jump();
+        return true;
       }
-    });
+    }
+    return false;
+  }
+
+  getCharacterData() {
+    return {
+      bottom: this.char.rY + this.char.rH,
+      centerY: this.char.rY + this.char.rH / 2,
+      isFalling: this.char.speedY < 0,
+    };
+  }
+
+  isValidJumpKill(enemy, charData) {
+    const enemyTop = enemy.rY;
+    const enemyCenterY = enemy.rY + enemy.rH / 2;
+
+    const isCharAboveCenter = charData.centerY < enemyCenterY - 10;
+    const isLandingOnTop = charData.bottom <= enemyTop + 20 && charData.isFalling;
+
+    return isLandingOnTop && isCharAboveCenter;
   }
 
   checkCoinCollisions() {
