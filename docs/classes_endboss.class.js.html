@@ -1,4 +1,32 @@
-/**
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>JSDoc: Source: classes/endboss.class.js</title>
+
+    <script src="scripts/prettify/prettify.js"> </script>
+    <script src="scripts/prettify/lang-css.js"> </script>
+    <!--[if lt IE 9]>
+      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <link type="text/css" rel="stylesheet" href="styles/prettify-tomorrow.css">
+    <link type="text/css" rel="stylesheet" href="styles/jsdoc-default.css">
+</head>
+
+<body>
+
+<div id="main">
+
+    <h1 class="page-title">Source: classes/endboss.class.js</h1>
+
+    
+
+
+
+    
+    <section>
+        <article>
+            <pre class="prettyprint source linenums"><code>/**
  * Final boss enemy class - the big chicken boss
  * @class Endboss
  * @extends MoveableObject
@@ -8,7 +36,7 @@
 class Endboss extends MoveableObject {
   /** @type {number} Boss width in pixels */
   width = 350;
-
+  
   /** @type {number} Boss height in pixels */
   height = 400;
 
@@ -53,16 +81,16 @@ class Endboss extends MoveableObject {
 
   /** @type {number} Real frame X coordinate for collision detection */
   rX;
-
+  
   /** @type {number} Real frame Y coordinate for collision detection */
   rY;
-
+  
   /** @type {number} Real frame width for collision detection */
   rW;
-
+  
   /** @type {number} Real frame height for collision detection */
   rH;
-
+  
   /** @type {Object} Collision detection offset values */
   offset = {
     top: 70,
@@ -70,10 +98,10 @@ class Endboss extends MoveableObject {
     bottom: 10,
     left: 20,
   };
-
+  
   /** @type {number} Animation interval reference */
   animationInterval;
-
+  
   /** @type {boolean} Whether the game has been won */
   gameWon = false;
 
@@ -101,7 +129,7 @@ class Endboss extends MoveableObject {
   initializeBoss() {
     this.stopAnimation();
     console.log("Endboss startBehavior - Energy:", this.energy);
-    if (world && world.stopBackgroundMusic) {
+    if (world &amp;&amp; world.stopBackgroundMusic) {
       world.stopBackgroundMusic();
     }
   }
@@ -117,7 +145,7 @@ class Endboss extends MoveableObject {
     let distance = this.x - char.x;
     if (Math.abs(distance) > 100) {
       this.playAnimation(this.IMAGES_WALK);
-      if (char.x < this.x) {
+      if (char.x &lt; this.x) {
         this.otherDirection = false;
         this.moveLeft();
       } else {
@@ -171,7 +199,7 @@ class Endboss extends MoveableObject {
   flyIn(onComplete) {
     console.log("Endboss flyIn - Energy:", this.energy);
     let interval = setInterval(() => {
-      if (this.y < 45) {
+      if (this.y &lt; 45) {
         this.y += 5;
       } else {
         this.y = 45;
@@ -193,7 +221,7 @@ class Endboss extends MoveableObject {
   hit() {
     console.log(`Endboss hit! ID: ${this.id}, Energy before: ${this.energy}`);
     this.energy -= 20;
-    if (this.energy < 0) this.energy = 0;
+    if (this.energy &lt; 0) this.energy = 0;
     console.log(`Endboss energy after hit: ${this.energy}`);
 
     if (this.energy === 0) {
@@ -218,7 +246,7 @@ class Endboss extends MoveableObject {
 
     let i = 0;
     this.deathAnimation = setInterval(() => {
-      if (i < this.IMAGES_DEAD.length) {
+      if (i &lt; this.IMAGES_DEAD.length) {
         let imgPath = this.IMAGES_DEAD[i];
         let loadedImage = this.imageCache[imgPath];
         if (loadedImage) {
@@ -234,14 +262,14 @@ class Endboss extends MoveableObject {
 
   gameWonScreen() {
     world.gameWon = true;
-    if (world && world.stopGame) {
+    if (world &amp;&amp; world.stopGame) {
       world.stopGame();
     }
     this.stopEndbossSound();
-    if (world && world.stopBackgroundMusic) {
+    if (world &amp;&amp; world.stopBackgroundMusic) {
       world.stopBackgroundMusic();
     }
-    if (world && world.playWinSound) {
+    if (world &amp;&amp; world.playWinSound) {
       world.playWinSound();
     }
 
@@ -252,3 +280,26 @@ class Endboss extends MoveableObject {
     document.getElementById("mute-button").style.display = "none";
   }
 }
+</code></pre>
+        </article>
+    </section>
+
+
+
+
+</div>
+
+<nav>
+    <h2><a href="index.html">Home</a></h2><h3>Classes</h3><ul><li><a href="Char.html">Char</a></li><li><a href="DrawableObject.html">DrawableObject</a></li><li><a href="Endboss.html">Endboss</a></li><li><a href="Keyboard.html">Keyboard</a></li><li><a href="Level.html">Level</a></li><li><a href="MoveableObject.html">MoveableObject</a></li><li><a href="ThrowableObject.html">ThrowableObject</a></li><li><a href="World.html">World</a></li></ul><h3>Global</h3><ul><li><a href="global.html#canvas">canvas</a></li><li><a href="global.html#handleKeyDown">handleKeyDown</a></li><li><a href="global.html#handleKeyUp">handleKeyUp</a></li><li><a href="global.html#init">init</a></li><li><a href="global.html#isMuted">isMuted</a></li><li><a href="global.html#keyboard">keyboard</a></li><li><a href="global.html#loadMuteStatus">loadMuteStatus</a></li><li><a href="global.html#setKeyState">setKeyState</a></li><li><a href="global.html#startGame">startGame</a></li><li><a href="global.html#stopAllSounds">stopAllSounds</a></li><li><a href="global.html#updateMuteIcon">updateMuteIcon</a></li><li><a href="global.html#world">world</a></li></ul>
+</nav>
+
+<br class="clear">
+
+<footer>
+    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 4.0.4</a> on Sat Jul 19 2025 19:24:51 GMT+0200 (Mitteleuropäische Sommerzeit)
+</footer>
+
+<script> prettyPrint(); </script>
+<script src="scripts/linenumber.js"> </script>
+</body>
+</html>

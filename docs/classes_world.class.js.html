@@ -1,4 +1,32 @@
-/**
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>JSDoc: Source: classes/world.class.js</title>
+
+    <script src="scripts/prettify/prettify.js"> </script>
+    <script src="scripts/prettify/lang-css.js"> </script>
+    <!--[if lt IE 9]>
+      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <link type="text/css" rel="stylesheet" href="styles/prettify-tomorrow.css">
+    <link type="text/css" rel="stylesheet" href="styles/jsdoc-default.css">
+</head>
+
+<body>
+
+<div id="main">
+
+    <h1 class="page-title">Source: classes/world.class.js</h1>
+
+    
+
+
+
+    
+    <section>
+        <article>
+            <pre class="prettyprint source linenums"><code>/**
  * Main game world class that manages all game objects and logic
  * @class World
  * @author El Pollo Loco Team
@@ -7,46 +35,46 @@
 class World {
   /** @type {Level} Current game level */
   level;
-
+  
   /** @type {CanvasRenderingContext2D} Canvas 2D rendering context */
   ctx;
-
+  
   /** @type {HTMLCanvasElement} Game canvas element */
   canvas;
-
+  
   /** @type {Keyboard} Keyboard input handler */
   keyboard;
-
+  
   /** @type {number} Camera X position for scrolling */
   camera_x = 0;
-
+  
   /** @type {StatusBar} Health status bar */
   statusBar = new StatusBar("health", 10, 3, 100);
-
+  
   /** @type {StatusBar} Coins status bar */
   coinsBar = new StatusBar("coins", 10, 35, 0);
-
+  
   /** @type {StatusBar} Bottles status bar */
   bottlesBar = new StatusBar("bottles", 10, 65, 0);
-
+  
   /** @type {EndbossStatusbar} Endboss health bar */
   endbossBar = new EndbossStatusbar();
-
+  
   /** @type {ThrowableObject[]} Array of throwable bottle objects */
   throwableObjects = [];
-
+  
   /** @type {World} Reference to world instance */
   world;
-
+  
   /** @type {boolean} Whether the game has been won */
   gameWon = false;
-
+  
   /** @type {boolean} Whether the game is over */
   gameOver = false;
-
+  
   /** @type {boolean} Whether the game is currently running */
   gameRunning = true;
-
+  
   /** @type {number} X position where boss fight triggers */
   bossTriggerX = 1800;
 
@@ -95,7 +123,7 @@ class World {
 
   checkThrowableObjects() {
     if (!this.gameRunning) return;
-    if (this.keyboard.D && this.char.bottles > 0 && this.canThrow) {
+    if (this.keyboard.D &amp;&amp; this.char.bottles > 0 &amp;&amp; this.canThrow) {
       let throwX = this.char.otherDirection ? this.char.x - 50 : this.char.x + 100;
       let bottle = new ThrowableObject(throwX, this.char.y + 100, this.char.otherDirection);
       this.throwableObjects.push(bottle);
@@ -115,7 +143,7 @@ class World {
         const charBottom = this.char.y + this.char.height;
         const enemyTop = enemy.y;
 
-        if (charBottom < enemyTop + 30) {
+        if (charBottom &lt; enemyTop + 30) {
           enemy.gotHit();
           this.char.speedY = 20;
         } else {
@@ -154,9 +182,9 @@ class World {
 
   checkThrowableCollisions() {
     this.throwableObjects.forEach((bottle) => {
-      if (!bottle.broken && this.endboss && bottle.isColliding(this.endboss)) {
+      if (!bottle.broken &amp;&amp; this.endboss &amp;&amp; bottle.isColliding(this.endboss)) {
         console.log(`Bottle hit CURRENT endboss! ID: ${this.endboss.id}, Energy: ${this.endboss.energy}`);
-        const endbossInLevel = this.level.enemies.find((e) => e instanceof Endboss && e.id === this.endboss.id);
+        const endbossInLevel = this.level.enemies.find((e) => e instanceof Endboss &amp;&amp; e.id === this.endboss.id);
         if (endbossInLevel) {
           console.log("Confirmed: This is the current endboss in level");
           bottle.break();
@@ -179,7 +207,7 @@ class World {
   }
 
   checkBossTrigger() {
-    if (!this.bossTriggered && this.char.x >= this.bossTriggerX) {
+    if (!this.bossTriggered &amp;&amp; this.char.x >= this.bossTriggerX) {
       this.bossTriggered = true;
       this.endboss.flyIn(() => {
         this.endboss.startBehavior(this.char);
@@ -195,7 +223,7 @@ class World {
   }
 
   renderEndbossBar() {
-    if (this.endboss && this.endbossBar) {
+    if (this.endboss &amp;&amp; this.endbossBar) {
       this.endbossBar.updatePosition(this.endboss);
       this.addToMap(this.endbossBar);
       this.endbossBar.setPercentage(this.endboss.energy);
@@ -219,7 +247,7 @@ class World {
     this.renderStaticObjects();
     this.ctx.translate(this.camera_x, 0);
     this.renderEndbossBar();
-    this.level.enemies.forEach((e) => e.move && e.move());
+    this.level.enemies.forEach((e) => e.move &amp;&amp; e.move());
     this.level.enemies = this.level.enemies.filter((e) => !e.markedForDeletion);
     this.throwableObjects.forEach((bottle) => {
       bottle.checkGroundCollision();
@@ -301,7 +329,7 @@ class World {
       this.char.stopWalkSound();
       this.char.stopSnoreSound();
     }
-    if (this.level && this.level.enemies) {
+    if (this.level &amp;&amp; this.level.enemies) {
       this.level.enemies.forEach((enemy) => {
         if (enemy.animationInterval) clearInterval(enemy.animationInterval);
         if (enemy.stopEndbossSound) enemy.stopEndbossSound();
@@ -310,3 +338,26 @@ class World {
     this.stopBackgroundMusic();
   }
 }
+</code></pre>
+        </article>
+    </section>
+
+
+
+
+</div>
+
+<nav>
+    <h2><a href="index.html">Home</a></h2><h3>Classes</h3><ul><li><a href="Char.html">Char</a></li><li><a href="DrawableObject.html">DrawableObject</a></li><li><a href="Endboss.html">Endboss</a></li><li><a href="Keyboard.html">Keyboard</a></li><li><a href="Level.html">Level</a></li><li><a href="MoveableObject.html">MoveableObject</a></li><li><a href="ThrowableObject.html">ThrowableObject</a></li><li><a href="World.html">World</a></li></ul><h3>Global</h3><ul><li><a href="global.html#canvas">canvas</a></li><li><a href="global.html#handleKeyDown">handleKeyDown</a></li><li><a href="global.html#handleKeyUp">handleKeyUp</a></li><li><a href="global.html#init">init</a></li><li><a href="global.html#isMuted">isMuted</a></li><li><a href="global.html#keyboard">keyboard</a></li><li><a href="global.html#loadMuteStatus">loadMuteStatus</a></li><li><a href="global.html#setKeyState">setKeyState</a></li><li><a href="global.html#startGame">startGame</a></li><li><a href="global.html#stopAllSounds">stopAllSounds</a></li><li><a href="global.html#updateMuteIcon">updateMuteIcon</a></li><li><a href="global.html#world">world</a></li></ul>
+</nav>
+
+<br class="clear">
+
+<footer>
+    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 4.0.4</a> on Sat Jul 19 2025 19:24:51 GMT+0200 (Mitteleuropäische Sommerzeit)
+</footer>
+
+<script> prettyPrint(); </script>
+<script src="scripts/linenumber.js"> </script>
+</body>
+</html>

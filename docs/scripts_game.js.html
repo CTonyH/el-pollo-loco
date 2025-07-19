@@ -1,4 +1,32 @@
-/**
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>JSDoc: Source: scripts/game.js</title>
+
+    <script src="scripts/prettify/prettify.js"> </script>
+    <script src="scripts/prettify/lang-css.js"> </script>
+    <!--[if lt IE 9]>
+      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <link type="text/css" rel="stylesheet" href="styles/prettify-tomorrow.css">
+    <link type="text/css" rel="stylesheet" href="styles/jsdoc-default.css">
+</head>
+
+<body>
+
+<div id="main">
+
+    <h1 class="page-title">Source: scripts/game.js</h1>
+
+    
+
+
+
+    
+    <section>
+        <article>
+            <pre class="prettyprint source linenums"><code>/**
  * @fileoverview Main game script for El Pollo Loco
  * Contains game initialization, controls, and UI management functions
  * @author El Pollo Loco Team
@@ -129,7 +157,7 @@ function stopAllSounds() {
       world.stopBackgroundMusic();
     }
     stopCharacterSounds();
-    if (world.endboss && world.endboss.stopEndbossSound) {
+    if (world.endboss &amp;&amp; world.endboss.stopEndbossSound) {
       world.endboss.stopEndbossSound();
     }
   }
@@ -160,7 +188,7 @@ function cleanupWorld() {
  * @private
  */
 function cleanupEnemies() {
-  if (world.level && world.level.enemies) {
+  if (world.level &amp;&amp; world.level.enemies) {
     world.level.enemies.forEach((enemy) => {
       if (enemy.animationInterval) clearInterval(enemy.animationInterval);
       if (enemy.stopEndbossSound) enemy.stopEndbossSound();
@@ -176,7 +204,7 @@ function cleanupEnemies() {
  */
 function startBackgroundMusicDelayed() {
   setTimeout(() => {
-    if (world && world.startBackgroundMusic && !isMuted) {
+    if (world &amp;&amp; world.startBackgroundMusic &amp;&amp; !isMuted) {
       world.startBackgroundMusic();
     }
   }, 100);
@@ -210,7 +238,7 @@ function setStylesStartGame() {
   document.getElementById("game-won").style.display = "none";
   document.getElementById("mute-button").style.display = "block";
   const touchControls = document.getElementById("touch-controls");
-  if (touchControls && window.innerWidth <= 720) {
+  if (touchControls &amp;&amp; window.innerWidth &lt;= 720) {
     touchControls.style.display = "block";
   }
 }
@@ -224,7 +252,7 @@ function setControlsVisibility() {
   if (window.innerWidth >= 1024) {
     document.getElementById("start-screen").style.display = "flex";
     document.getElementById("controls-info").style.display = "block";
-  } else if (window.innerWidth < 1024) {
+  } else if (window.innerWidth &lt; 1024) {
     document.getElementById("controls-info").style.display = "none";
   }
 }
@@ -252,7 +280,7 @@ function setStylesStartScreen() {
 
 function showStartScreen() {
   stopAllSounds();
-  if (world && world.stopGame) {
+  if (world &amp;&amp; world.stopGame) {
     world.stopGame();
   }
   setStylesStartScreen();
@@ -282,7 +310,7 @@ window.addEventListener("orientationchange", function () {
 function handleMuteOn(icon) {
   icon.src = "./img/logo/mute.png";
   stopAllSounds();
-  if (world && world.char) {
+  if (world &amp;&amp; world.char) {
     world.char.stopWalkSound();
     if (world.char.stopSnoreSound) world.char.stopSnoreSound();
   }
@@ -290,8 +318,8 @@ function handleMuteOn(icon) {
 
 function handleMuteOff(icon) {
   icon.src = "./img/logo/volume.png";
-  if (world && !world.gameOver && !world.gameWon && world.gameRunning) {
-    if (world.endboss && world.bossBehaviorStarted) {
+  if (world &amp;&amp; !world.gameOver &amp;&amp; !world.gameWon &amp;&amp; world.gameRunning) {
+    if (world.endboss &amp;&amp; world.bossBehaviorStarted) {
       world.endboss.endbossSfx.currentTime = 0;
       world.endboss.endbossSfx.play().catch((e) => console.log("Endboss audio failed:", e));
     } else {
@@ -422,3 +450,26 @@ function showGameWon() {
     touchControls.style.display = "none";
   }
 }
+</code></pre>
+        </article>
+    </section>
+
+
+
+
+</div>
+
+<nav>
+    <h2><a href="index.html">Home</a></h2><h3>Classes</h3><ul><li><a href="Char.html">Char</a></li><li><a href="DrawableObject.html">DrawableObject</a></li><li><a href="Endboss.html">Endboss</a></li><li><a href="Keyboard.html">Keyboard</a></li><li><a href="Level.html">Level</a></li><li><a href="MoveableObject.html">MoveableObject</a></li><li><a href="ThrowableObject.html">ThrowableObject</a></li><li><a href="World.html">World</a></li></ul><h3>Global</h3><ul><li><a href="global.html#canvas">canvas</a></li><li><a href="global.html#handleKeyDown">handleKeyDown</a></li><li><a href="global.html#handleKeyUp">handleKeyUp</a></li><li><a href="global.html#init">init</a></li><li><a href="global.html#isMuted">isMuted</a></li><li><a href="global.html#keyboard">keyboard</a></li><li><a href="global.html#loadMuteStatus">loadMuteStatus</a></li><li><a href="global.html#setKeyState">setKeyState</a></li><li><a href="global.html#startGame">startGame</a></li><li><a href="global.html#stopAllSounds">stopAllSounds</a></li><li><a href="global.html#updateMuteIcon">updateMuteIcon</a></li><li><a href="global.html#world">world</a></li></ul>
+</nav>
+
+<br class="clear">
+
+<footer>
+    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 4.0.4</a> on Sat Jul 19 2025 19:24:51 GMT+0200 (Mitteleuropäische Sommerzeit)
+</footer>
+
+<script> prettyPrint(); </script>
+<script src="scripts/linenumber.js"> </script>
+</body>
+</html>

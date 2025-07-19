@@ -1,0 +1,22 @@
+{
+  "source": {
+    "include": ["./scripts/", "./classes/", "./levels/", "./README.md"],
+    "includePattern": "\\.(js|jsx)$",
+    "exclude": ["node_modules/"],
+    "excludePattern": "((^|\\/|\\\\)_|\\.(test|spec)\\.js$)"
+  },
+  "opts": {
+    "destination": "./docs/",
+    "recurse": true,
+    "readme": "./README.md"
+  },
+  "plugins": ["plugins/markdown"],
+  "templates": {
+    "cleverLinks": false,
+    "monospaceLinks": false
+  },
+  "metadata": {
+    "title": "El Pollo Loco - Game Documentation",
+    "version": "1.0.0"
+  }
+}

@@ -1,4 +1,32 @@
-/**
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>JSDoc: Source: classes/char.class.js</title>
+
+    <script src="scripts/prettify/prettify.js"> </script>
+    <script src="scripts/prettify/lang-css.js"> </script>
+    <!--[if lt IE 9]>
+      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <link type="text/css" rel="stylesheet" href="styles/prettify-tomorrow.css">
+    <link type="text/css" rel="stylesheet" href="styles/jsdoc-default.css">
+</head>
+
+<body>
+
+<div id="main">
+
+    <h1 class="page-title">Source: classes/char.class.js</h1>
+
+    
+
+
+
+    
+    <section>
+        <article>
+            <pre class="prettyprint source linenums"><code>/**
  * Main character class representing the player character Pepe
  * @class Char
  * @extends MoveableObject
@@ -8,13 +36,13 @@
 class Char extends MoveableObject {
   /** @type {number} Character width in pixels */
   width = 150;
-
+  
   /** @type {number} Character height in pixels */
   height = 250;
-
+  
   /** @type {boolean} Mirror state for sprite direction */
   mirrow = true;
-
+  
   /** @type {number} Initial Y position */
   y = 180;
 
@@ -85,19 +113,19 @@ class Char extends MoveableObject {
 
   /** @type {World} Reference to the game world */
   world;
-
+  
   /** @type {number} Movement speed in pixels */
   speed = 10;
-
+  
   /** @type {number} Real frame X coordinate for collision detection */
   rX;
-
+  
   /** @type {number} Real frame Y coordinate for collision detection */
   rY;
-
+  
   /** @type {number} Real frame width for collision detection */
   rW;
-
+  
   /** @type {number} Real frame height for collision detection */
   rH;
 
@@ -108,7 +136,7 @@ class Char extends MoveableObject {
     bottom: 10,
     left: 20,
   };
-
+  
   /** @type {number} Timestamp of last hit for damage cooldown */
   lastHit = 0;
 
@@ -156,23 +184,23 @@ class Char extends MoveableObject {
   handleMovement() {
     if (!this.world.gameRunning) return;
     let isMoving = false;
-    if (this.world.keyboard.RIGHT && this.x < this.world.level.level_end_x) {
+    if (this.world.keyboard.RIGHT &amp;&amp; this.x &lt; this.world.level.level_end_x) {
       this.moveRight();
       isMoving = true;
     }
-    if (this.world.keyboard.LEFT && this.x > 0) {
+    if (this.world.keyboard.LEFT &amp;&amp; this.x > 0) {
       this.moveLeft(this.mirrow);
       isMoving = true;
     }
     this.handleWalkSound(isMoving);
-    if (this.world.keyboard.SPACE && !this.isAboveGround()) {
+    if (this.world.keyboard.SPACE &amp;&amp; !this.isAboveGround()) {
       this.jump();
     }
     this.world.camera_x = -this.x + 100;
   }
 
   handleWalkSound(isMoving) {
-    if (isMoving && !this.isAboveGround()) {
+    if (isMoving &amp;&amp; !this.isAboveGround()) {
       this.startWalkSound();
     } else {
       this.stopWalkSound();
@@ -181,7 +209,7 @@ class Char extends MoveableObject {
 
   handleAnimationStates() {
     if (!this.world.gameRunning) return;
-    if (this.isDead() && !this.deadAnimationPlayed) {
+    if (this.isDead() &amp;&amp; !this.deadAnimationPlayed) {
       this.handleDeathAnimation();
     } else if (this.isHurt()) {
       this.playAnimation(this.IMAGES_HURT);
@@ -246,7 +274,7 @@ class Char extends MoveableObject {
   playAnimationOnce(images, onComplete) {
     let i = 0;
     let interval = setInterval(() => {
-      if (i < images.length) {
+      if (i &lt; images.length) {
         let path = images[i];
         this.img = this.imageCache[path];
         i++;
@@ -258,7 +286,7 @@ class Char extends MoveableObject {
   }
 
   startSnoreSound() {
-    if (!this.isSnoring && !isMuted) {
+    if (!this.isSnoring &amp;&amp; !isMuted) {
       this.isSnoring = true;
       this.snoreSfx.currentTime = 0;
       this.snoreSfx.play().catch((e) => console.log("Snore audio failed:", e));
@@ -274,14 +302,14 @@ class Char extends MoveableObject {
   }
 
   gameOverScreen() {
-    if (this.world && this.world.stopGame) {
+    if (this.world &amp;&amp; this.world.stopGame) {
       this.world.stopGame();
     }
     this.stopSnoreSound();
-    if (this.world && this.world.playGameOverSound) {
+    if (this.world &amp;&amp; this.world.playGameOverSound) {
       this.world.playGameOverSound();
     }
-    if (this.world && this.world.stopBackgroundMusic) {
+    if (this.world &amp;&amp; this.world.stopBackgroundMusic) {
       this.world.stopBackgroundMusic();
     }
 
@@ -292,3 +320,26 @@ class Char extends MoveableObject {
     document.getElementById("mute-button").style.display = "none";
   }
 }
+</code></pre>
+        </article>
+    </section>
+
+
+
+
+</div>
+
+<nav>
+    <h2><a href="index.html">Home</a></h2><h3>Classes</h3><ul><li><a href="Char.html">Char</a></li><li><a href="DrawableObject.html">DrawableObject</a></li><li><a href="Endboss.html">Endboss</a></li><li><a href="Keyboard.html">Keyboard</a></li><li><a href="Level.html">Level</a></li><li><a href="MoveableObject.html">MoveableObject</a></li><li><a href="ThrowableObject.html">ThrowableObject</a></li><li><a href="World.html">World</a></li></ul><h3>Global</h3><ul><li><a href="global.html#canvas">canvas</a></li><li><a href="global.html#handleKeyDown">handleKeyDown</a></li><li><a href="global.html#handleKeyUp">handleKeyUp</a></li><li><a href="global.html#init">init</a></li><li><a href="global.html#isMuted">isMuted</a></li><li><a href="global.html#keyboard">keyboard</a></li><li><a href="global.html#loadMuteStatus">loadMuteStatus</a></li><li><a href="global.html#setKeyState">setKeyState</a></li><li><a href="global.html#startGame">startGame</a></li><li><a href="global.html#stopAllSounds">stopAllSounds</a></li><li><a href="global.html#updateMuteIcon">updateMuteIcon</a></li><li><a href="global.html#world">world</a></li></ul>
+</nav>
+
+<br class="clear">
+
+<footer>
+    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 4.0.4</a> on Sat Jul 19 2025 19:24:51 GMT+0200 (Mitteleuropäische Sommerzeit)
+</footer>
+
+<script> prettyPrint(); </script>
+<script src="scripts/linenumber.js"> </script>
+</body>
+</html>

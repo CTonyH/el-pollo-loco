@@ -1,0 +1,23 @@
+{
+  "name": "el-pollo-loco",
+  "version": "1.0.0",
+  "description": "A fun JavaScript game featuring Pepe fighting chickens and collecting items",
+  "main": "index.html",
+  "scripts": {
+    "docs": "jsdoc -c jsdoc.conf.json",
+    "docs:watch": "jsdoc -c jsdoc.conf.json --watch",
+    "serve-docs": "cd docs && python -m http.server 8080"
+  },
+  "keywords": [
+    "game",
+    "javascript",
+    "canvas",
+    "pepe",
+    "chicken"
+  ],
+  "author": "El Pollo Loco Team",
+  "license": "MIT",
+  "devDependencies": {
+    "jsdoc": "^4.0.0"
+  }
+}
