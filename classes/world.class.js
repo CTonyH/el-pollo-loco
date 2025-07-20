@@ -8,7 +8,13 @@ class World {
   /** @type {Level} Current game level */
   level;
 
-  /** @type {CanvasRenderingContext2D} Canvas 2D rendering context */
+  /** @type {CanvasRenderingContext2D} Canvas      if (!bottle.broken && this.endboss && bottle.isColliding(this.endboss)) {
+        const endbossInLevel = this.level.enemies.find((e) => e instanceof Endboss && e.id === this.endboss.id);
+        if (endbossInLevel) {
+          bottle.breakBottle();
+          this.endboss.hit();
+          this.endbossBar.setPercentage(this.endboss.energy);
+        }g context */
   ctx;
 
   /** @type {HTMLCanvasElement} Game canvas element */
@@ -48,7 +54,13 @@ class World {
   gameRunning = true;
 
   /** @type {number} X position where boss fight triggers */
-  bossTriggerX = 1800;
+  bossTriggerX = 2000;
+
+  /** @type {boolean} Whether coin completion bonus has been awarded */
+  coinBonusAwarded = false;
+
+  /** @type {Audio} Bonus sound effect for collecting all coins */
+  bonusSfx;
 
   /**
    * Creates a new game world instance
@@ -67,10 +79,12 @@ class World {
     this.gameOverSfx = new Audio("audio/gameover.mp3");
     this.gameOverSfx.volume = 0.5;
     this.backgroundMusic = new Audio("audio/main-menu.mp3");
-    this.backgroundMusic.volume = 0.3;
+    this.backgroundMusic.volume = 0.15;
     this.backgroundMusic.loop = true;
     this.winSfx = new Audio("audio/win.mp3");
     this.winSfx.volume = 0.5;
+    this.bonusSfx = new Audio("audio/collect-coin.mp3");
+    this.bonusSfx.volume = 0.6;
     this.render();
     this.setWorld();
     this.run();
@@ -165,8 +179,71 @@ class World {
           this.coinCollectSfx.currentTime = 0;
           this.coinCollectSfx.play().catch((e) => console.log("Coin collect audio failed:", e));
         }
+        this.checkCoinCompletion();
       }
     });
+  }
+
+  checkCoinCompletion() {
+    if (this.allCoinsCollected() && !this.coinBonusAwarded) {
+      this.awardCoinCompletionBonus();
+    }
+  }
+
+  allCoinsCollected() {
+    return this.char.coins >= this.maxCoins;
+  }
+
+  awardCoinCompletionBonus() {
+    this.coinBonusAwarded = true;
+    this.char.bottles += 5;
+    this.bottlesBar.setPercentage(this.char.bottles * 10);
+    this.showCoinCompletionEffect();
+    this.playBonusSound();
+  }
+
+  showCoinCompletionEffect() {
+    this.showBonusMessage("🎉 ALL COINS COLLECTED! +5 BOTTLES! 🎉");
+  }
+
+  showBonusMessage(message) {
+    const messageElement = document.createElement("div");
+    messageElement.textContent = message;
+    messageElement.style.cssText = `
+      position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%);
+      background: linear-gradient(45deg, gold, orange); color: white;
+      padding: 20px 40px; border-radius: 15px; font-size: 24px;
+      font-family: 'Fredericka', cursive; font-weight: bold;
+      text-align: center; z-index: 2000; box-shadow: 0 0 30px gold;
+      animation: bounce 0.6s ease-in-out, fadeOut 2s ease-in-out 1.5s forwards;
+    `;
+
+    const style = document.createElement("style");
+    style.textContent = `
+      @keyframes bounce {
+        0%, 20%, 50%, 80%, 100% { transform: translate(-50%, -50%) translateY(0); }
+        40% { transform: translate(-50%, -50%) translateY(-30px); }
+        60% { transform: translate(-50%, -50%) translateY(-15px); }
+      }
+      @keyframes fadeOut {
+        to { opacity: 0; transform: translate(-50%, -50%) scale(0.8); }
+      }
+    `;
+
+    document.head.appendChild(style);
+    document.body.appendChild(messageElement);
+
+    setTimeout(() => {
+      document.body.removeChild(messageElement);
+      document.head.removeChild(style);
+    }, 3500);
+  }
+
+  playBonusSound() {
+    if (!isMuted) {
+      this.bonusSfx.currentTime = 0;
+      this.bonusSfx.play().catch((e) => console.log("Bonus audio failed:", e));
+    }
   }
 
   checkBottleCollisions() {
@@ -271,7 +348,6 @@ class World {
       this.flipImage(mo);
     }
     mo.draw(this.ctx);
-    mo.drawFramework(this.ctx);
     if (mo.otherDirection) {
       this.flipImageBack(mo);
     }
@@ -316,7 +392,6 @@ class World {
   }
 
   stopGame() {
-    console.log("Stopping game completely...");
     this.gameRunning = false;
     if (this.animationFrame) {
       cancelAnimationFrame(this.animationFrame);

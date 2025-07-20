@@ -90,17 +90,14 @@ class Endboss extends MoveableObject {
     this.x = 2800;
     this.y = -400;
     this.id = "Endboss_" + Date.now();
-    console.log("Before setting energy, inherited energy is:", this.energy);
     this.energy = 100;
-    console.log(`New Endboss created with energy: ${this.energy}, ID: ${this.id}`);
     this.endbossSfx = new Audio("audio/endboss.mp3");
-    this.endbossSfx.volume = 0.5;
+    this.endbossSfx.volume = 0.3;
     this.endbossSfx.loop = true;
   }
 
   initializeBoss() {
     this.stopAnimation();
-    console.log("Endboss startBehavior - Energy:", this.energy);
     if (world && world.stopBackgroundMusic) {
       world.stopBackgroundMusic();
     }
@@ -158,7 +155,6 @@ class Endboss extends MoveableObject {
   draw(ctx) {
     this.getRealFrame();
     super.draw(ctx);
-    this.drawFramework(ctx);
   }
 
   animateAlert() {
@@ -169,7 +165,6 @@ class Endboss extends MoveableObject {
   }
 
   flyIn(onComplete) {
-    console.log("Endboss flyIn - Energy:", this.energy);
     let interval = setInterval(() => {
       if (this.y < 45) {
         this.y += 5;
@@ -191,10 +186,8 @@ class Endboss extends MoveableObject {
   }
 
   hit() {
-    console.log(`Endboss hit! ID: ${this.id}, Energy before: ${this.energy}`);
     this.energy -= 20;
     if (this.energy < 0) this.energy = 0;
-    console.log(`Endboss energy after hit: ${this.energy}`);
 
     if (this.energy === 0) {
       this.die();

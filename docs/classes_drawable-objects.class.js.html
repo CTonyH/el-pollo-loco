@@ -82,22 +82,6 @@ class DrawableObject {
       this.imageCache[path] = img;
     });
   } 
-
-  /**
-   * Draws a debug framework around collision-enabled objects
-   * @param {CanvasRenderingContext2D} ctx - The canvas rendering context
-   * @private
-   */
-  drawFramework(ctx) {
-    if (this instanceof Char || this instanceof Chicken || this instanceof Endboss || this instanceof Coins || this instanceof Bottle) {
-      ctx.beginPath();
-      ctx.lineWidth = "5";
-      ctx.strokeStyle = "red";
-      ctx.rect(this.rX, this.rY, this.rW, this.rH);
-      ctx.stroke();
-    }
-  }
-}
 </code></pre>
         </article>
     </section>

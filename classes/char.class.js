@@ -150,7 +150,6 @@ class Char extends MoveableObject {
   draw(ctx) {
     this.getRealFrame();
     super.draw(ctx);
-    this.drawFramework(ctx);
   }
 
   handleMovement() {
