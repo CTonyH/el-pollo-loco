@@ -68,17 +68,11 @@ class World {
     this.char = new Char(this, keyboard);
     this.lastThrowTime = 0;
     this.level = level1;
-    this.coinCollectSfx = new Audio("audio/collect-coin.mp3");
-    this.coinCollectSfx.volume = 0.4;
-    this.gameOverSfx = new Audio("audio/gameover.mp3");
-    this.gameOverSfx.volume = 0.5;
-    this.backgroundMusic = new Audio("audio/main-menu.mp3");
-    this.backgroundMusic.volume = 0.15;
-    this.backgroundMusic.loop = true;
-    this.winSfx = new Audio("audio/win.mp3");
-    this.winSfx.volume = 0.5;
-    this.bonusSfx = new Audio("audio/collect-coin.mp3");
-    this.bonusSfx.volume = 0.6;
+    this.backgroundMusic = AudioManager.getAudio("audio/main-menu.mp3");
+    if (this.backgroundMusic) {
+      this.backgroundMusic.volume = 0.15;
+      this.backgroundMusic.loop = true;
+    }
     this.render();
     this.setWorld();
     this.run();
@@ -169,10 +163,7 @@ class World {
         const percent = Math.min(100, (this.char.coins / this.maxCoins) * 100);
         this.coinsBar.setPercentage(percent);
         this.level.coins.splice(index, 1);
-        if (!isMuted) {
-          this.coinCollectSfx.currentTime = 0;
-          this.coinCollectSfx.play().catch((e) => console.log("Coin collect audio failed:", e));
-        }
+        AudioManager.safePlay("audio/collect-coin.mp3", 0.4);
         this.checkCoinCompletion();
       }
     });
@@ -234,10 +225,7 @@ class World {
   }
 
   playBonusSound() {
-    if (!isMuted) {
-      this.bonusSfx.currentTime = 0;
-      this.bonusSfx.play().catch((e) => console.log("Bonus audio failed:", e));
-    }
+    AudioManager.safePlay("audio/collect-coin.mp3", 0.6);
   }
 
   checkBottleCollisions() {
@@ -257,7 +245,7 @@ class World {
       if (!bottle.broken && this.endboss && bottle.isColliding(this.endboss)) {
         const endbossInLevel = this.level.enemies.find((e) => e instanceof Endboss && e.id === this.endboss.id);
         if (endbossInLevel) {
-          bottle.breakBottle();
+          bottle.break();
           this.endboss.hit();
           this.endbossBar.setPercentage(this.endboss.energy);
         }
@@ -343,29 +331,25 @@ class World {
   }
 
   startBackgroundMusic() {
-    if (!isMuted) {
+    if (!isMuted && this.backgroundMusic) {
       this.backgroundMusic.currentTime = 0;
       this.backgroundMusic.play().catch((e) => console.log("Background music failed:", e));
     }
   }
 
   stopBackgroundMusic() {
-    this.backgroundMusic.pause();
-    this.backgroundMusic.currentTime = 0;
+    if (this.backgroundMusic) {
+      this.backgroundMusic.pause();
+      this.backgroundMusic.currentTime = 0;
+    }
   }
 
   playGameOverSound() {
-    if (!isMuted) {
-      this.gameOverSfx.currentTime = 0;
-      this.gameOverSfx.play().catch((e) => console.log("Game over audio failed:", e));
-    }
+    AudioManager.safePlay("audio/gameover.mp3", 0.5);
   }
 
   playWinSound() {
-    if (!isMuted) {
-      this.winSfx.currentTime = 0;
-      this.winSfx.play().catch((e) => console.log("Win audio failed:", e));
-    }
+    AudioManager.safePlay("audio/win.mp3", 0.5);
   }
 
   flipImage(mo) {

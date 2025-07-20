@@ -91,9 +91,12 @@ class Endboss extends MoveableObject {
     this.y = -400;
     this.id = "Endboss_" + Date.now();
     this.energy = 100;
-    this.endbossSfx = new Audio("audio/endboss.mp3");
-    this.endbossSfx.volume = 0.3;
-    this.endbossSfx.loop = true;
+    this.offset = {
+      top: 50,
+      left: 50,
+      right: 50,
+      bottom: 80,
+    };
   }
 
   initializeBoss() {
@@ -104,9 +107,12 @@ class Endboss extends MoveableObject {
   }
 
   startBossMusic() {
-    if (!isMuted) {
-      this.endbossSfx.currentTime = 0;
-      this.endbossSfx.play().catch((e) => console.log("Endboss audio failed:", e));
+    this.endbossSound = AudioManager.getAudio("audio/endboss.mp3");
+    if (this.endbossSound && !isMuted) {
+      this.endbossSound.loop = true;
+      this.endbossSound.volume = 0.3;
+      this.endbossSound.currentTime = 0;
+      this.endbossSound.play().catch((e) => console.log("Endboss audio failed:", e));
     }
   }
 
@@ -135,9 +141,9 @@ class Endboss extends MoveableObject {
   }
 
   stopEndbossSound() {
-    if (this.endbossSfx) {
-      this.endbossSfx.pause();
-      this.endbossSfx.currentTime = 0;
+    if (this.endbossSound) {
+      this.endbossSound.pause();
+      this.endbossSound.currentTime = 0;
     }
   }
 

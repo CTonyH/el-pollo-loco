@@ -127,9 +127,6 @@ class Char extends MoveableObject {
     this.loadImages(this.IMAGES_HURT);
     this.loadImages(this.IMAGES_IDLE);
     this.loadImages(this.IMAGES_LONG_IDLE);
-    this.snoreSfx = new Audio("audio/snore.mp3");
-    this.snoreSfx.volume = 0.3;
-    this.snoreSfx.loop = true;
     this.isSnoring = false;
 
     this.x = 100;
@@ -259,16 +256,21 @@ class Char extends MoveableObject {
   startSnoreSound() {
     if (!this.isSnoring && !isMuted) {
       this.isSnoring = true;
-      this.snoreSfx.currentTime = 0;
-      this.snoreSfx.play().catch((e) => console.log("Snore audio failed:", e));
+      this.snoreSound = AudioManager.getAudio("audio/snore.mp3");
+      if (this.snoreSound) {
+        this.snoreSound.loop = true;
+        this.snoreSound.volume = 0.3;
+        this.snoreSound.currentTime = 0;
+        this.snoreSound.play().catch((e) => console.log("Snore audio failed:", e));
+      }
     }
   }
 
   stopSnoreSound() {
-    if (this.isSnoring) {
+    if (this.isSnoring && this.snoreSound) {
       this.isSnoring = false;
-      this.snoreSfx.pause();
-      this.snoreSfx.currentTime = 0;
+      this.snoreSound.pause();
+      this.snoreSound.currentTime = 0;
     }
   }
 

@@ -123,6 +123,7 @@ function stopCharacterSounds() {
  * @function
  */
 function stopAllSounds() {
+  AudioManager.stopAll();
   if (world) {
     stopWorldSounds();
     if (world.stopBackgroundMusic) {
@@ -184,14 +185,17 @@ function startBackgroundMusicDelayed() {
 
 /**
  * Starts a new game session
- * Cleans up previous game state and initializes new game
+ * Preloads resources and initializes new game
  * @function
  */
-function startGame() {
-  stopAllSounds();
+async function startGame() {
+  AudioManager.stopAll();
   cleanupWorld();
   setStylesStartGame();
   bttnDisappear();
+
+  await ResourcePreloader.preloadAll();
+
   initLevel();
   init();
   startBackgroundMusicDelayed();
@@ -260,8 +264,6 @@ function showStartScreen() {
 }
 
 function bttnDisappear() {
-  console.log("buttons verschwinden");
-
   document.getElementById("restart-button").style.display = "none";
   document.getElementById("menu-button").style.display = "none";
 }
@@ -281,7 +283,7 @@ window.addEventListener("orientationchange", function () {
 
 function handleMuteOn(icon) {
   icon.src = "./img/logo/mute.png";
-  stopAllSounds();
+  AudioManager.stopAll();
   if (world && world.char) {
     world.char.stopWalkSound();
     if (world.char.stopSnoreSound) world.char.stopSnoreSound();
@@ -293,7 +295,6 @@ function handleMuteOff(icon) {
   if (world && !world.gameOver && !world.gameWon && world.gameRunning) {
     if (world.endboss && world.bossBehaviorStarted) {
       world.endboss.endbossSfx.currentTime = 0;
-      world.endboss.endbossSfx.play().catch((e) => console.log("Endboss audio failed:", e));
     } else {
       world.startBackgroundMusic();
     }
@@ -400,9 +401,10 @@ function initTouchControls() {
   addTouchEndEvents(elements);
   addTouchCancelEvents(elements);
 }
-document.addEventListener("DOMContentLoaded", function () {
+document.addEventListener("DOMContentLoaded", async function () {
   initTouchControls();
   loadMuteStatus();
+  await ResourcePreloader.preloadAll();
 });
 
 function showGameOver() {

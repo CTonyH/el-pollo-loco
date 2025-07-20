@@ -13,7 +13,7 @@ class ThrowableObject extends MoveableObject {
     "img/6_salsa_bottle/bottle_rotation/3_bottle_rotation.png",
     "img/6_salsa_bottle/bottle_rotation/4_bottle_rotation.png",
   ];
-  
+
   /** @type {string[]} Array of bottle breaking/splash image paths */
   IMAGES_BROKEN = [
     "img/6_salsa_bottle/bottle_rotation/bottle_splash/1_bottle_splash.png",
@@ -27,7 +27,7 @@ class ThrowableObject extends MoveableObject {
   /**
    * Creates a new throwable bottle object
    * @param {number} x - Initial x position
-   * @param {number} y - Initial y position  
+   * @param {number} y - Initial y position
    * @param {boolean} direction - Throw direction (true = left, false = right)
    * @example
    * // Create a bottle thrown to the right from position (100, 200)
@@ -44,10 +44,12 @@ class ThrowableObject extends MoveableObject {
     this.broken = false;
     this.otherDirection = direction;
     this.throwDirection = direction;
-    this.throwSfx = new Audio("audio/bottle-throw.mp3");
-    this.breakSfx = new Audio("audio/bottle-broke.mp3");
-    this.throwSfx.volume = 0.4;
-    this.breakSfx.volume = 0.5;
+    this.offset = {
+      top: 10,
+      left: 10,
+      right: 10,
+      bottom: 10,
+    };
 
     this.throw();
     this.animate();
@@ -62,10 +64,7 @@ class ThrowableObject extends MoveableObject {
    * const bottle = new ThrowableObject(100, 200, false);
    */
   throw() {
-    if (!isMuted) {
-      this.throwSfx.currentTime = 0;
-      this.throwSfx.play().catch((e) => console.log("Bottle throw audio failed:", e));
-    }
+    AudioManager.safePlay("audio/bottle-throw.mp3", 0.4);
 
     this.speedY = 10;
     this.acceleration = 0.5;
@@ -96,10 +95,7 @@ class ThrowableObject extends MoveableObject {
    * @throws {Error} Audio playback may fail if audio context is not available
    */
   playBreakSound() {
-    if (!isMuted) {
-      this.breakSfx.currentTime = 0;
-      this.breakSfx.play().catch((e) => console.log("Bottle break audio failed:", e));
-    }
+    AudioManager.safePlay("audio/bottle-broke.mp3", 0.5);
   }
 
   /**
