@@ -1,8 +1,5 @@
 let level1;
-function initLevel(){
-
-
-
+function initLevel() {
   level1 = new Level(
     [
       new Chicken(),
@@ -27,18 +24,18 @@ function initLevel(){
       new Chick(),
       new Chick(),
       new Chick(),
-      new Endboss()
+      new Endboss(),
     ],
 
-    [ 
-      new Clouds(0), 
-      new Clouds(400), 
-      new Clouds(800), 
-      new Clouds(1200), 
+    [
+      new Clouds(0),
+      new Clouds(400),
+      new Clouds(800),
+      new Clouds(1200),
       new Clouds(1600),
       new Clouds(2000),
       new Clouds(2400),
-      new Clouds(2800)
+      new Clouds(2800),
     ],
 
     [
@@ -65,15 +62,39 @@ function initLevel(){
     ],
 
     [
-      new Coins(), new Coins(), new Coins(), new Coins(), new Coins(),
-      new Coins(), new Coins(), new Coins(), new Coins(), new Coins(),
-      new Coins(), new Coins(), new Coins(), new Coins()
+      new Coins(),
+      new Coins(),
+      new Coins(),
+      new Coins(),
+      new Coins(),
+      new Coins(),
+      new Coins(),
+      new Coins(),
+      new Coins(),
+      new Coins(),
+      new Coins(),
+      new Coins(),
+      new Coins(),
+      new Coins(),
     ],
 
     [
-      new Bottle(), new Bottle(), new Bottle(), new Bottle(), new Bottle(),
-      new Bottle(), new Bottle(), new Bottle(), new Bottle(), new Bottle(),
-      new Bottle(), new Bottle(), new Bottle(), new Bottle(), new Bottle(), new Bottle()
+      new Bottle(),
+      new Bottle(),
+      new Bottle(),
+      new Bottle(),
+      new Bottle(),
+      new Bottle(),
+      new Bottle(),
+      new Bottle(),
+      new Bottle(),
+      new Bottle(),
+      new Bottle(),
+      new Bottle(),
+      new Bottle(),
+      new Bottle(),
+      new Bottle(),
+      new Bottle(),
     ]
   );
 }

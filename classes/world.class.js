@@ -8,13 +8,7 @@ class World {
   /** @type {Level} Current game level */
   level;
 
-  /** @type {CanvasRenderingContext2D} Canvas      if (!bottle.broken && this.endboss && bottle.isColliding(this.endboss)) {
-        const endbossInLevel = this.level.enemies.find((e) => e instanceof Endboss && e.id === this.endboss.id);
-        if (endbossInLevel) {
-          bottle.breakBottle();
-          this.endboss.hit();
-          this.endbossBar.setPercentage(this.endboss.energy);
-        }g context */
+  /** @type {CanvasRenderingContext2D} Canvas rendering context */
   ctx;
 
   /** @type {HTMLCanvasElement} Game canvas element */
@@ -261,16 +255,11 @@ class World {
   checkThrowableCollisions() {
     this.throwableObjects.forEach((bottle) => {
       if (!bottle.broken && this.endboss && bottle.isColliding(this.endboss)) {
-        console.log(`Bottle hit CURRENT endboss! ID: ${this.endboss.id}, Energy: ${this.endboss.energy}`);
         const endbossInLevel = this.level.enemies.find((e) => e instanceof Endboss && e.id === this.endboss.id);
         if (endbossInLevel) {
-          console.log("Confirmed: This is the current endboss in level");
-          bottle.break();
+          bottle.breakBottle();
           this.endboss.hit();
           this.endbossBar.setPercentage(this.endboss.energy);
-          console.log(`Endboss energy after hit: ${this.endboss.energy}`);
-        } else {
-          console.log("ERROR: Bottle hit old endboss reference!");
         }
       }
     });
