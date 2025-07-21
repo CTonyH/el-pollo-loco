@@ -108,8 +108,14 @@ window.addEventListener("keyup", (e) => handleKeyEvent(e, false));
 function stopAllSounds() {
   AudioManager.stopAll();
   if (world) {
-    if (world.winSfx) { world.winSfx.pause(); world.winSfx.currentTime = 0; }
-    if (world.gameOverSfx) { world.gameOverSfx.pause(); world.gameOverSfx.currentTime = 0; }
+    if (world.winSfx) {
+      world.winSfx.pause();
+      world.winSfx.currentTime = 0;
+    }
+    if (world.gameOverSfx) {
+      world.gameOverSfx.pause();
+      world.gameOverSfx.currentTime = 0;
+    }
     if (world.stopBackgroundMusic) world.stopBackgroundMusic();
     if (world.char) {
       if (world.char.stopWalkSound) world.char.stopWalkSound();
@@ -144,7 +150,7 @@ function cleanupWorld() {
  * @function
  */
 function resetKeyboard() {
-  Object.keys(keyboard).forEach(key => keyboard[key] = false);
+  Object.keys(keyboard).forEach((key) => (keyboard[key] = false));
 }
 
 /**
@@ -173,19 +179,19 @@ async function startGame() {
 function setGameScreens(screen) {
   const screens = ["start-screen", "game-over", "game-won", "canvas"];
   const visibility = {
-    "start": { "start-screen": "flex", others: "none" },
-    "game": { "canvas": "block", others: "none" },
-    "over": { "game-over": "block", "game-over-screen": "flex", others: "none" },
-    "won": { "game-won": "block", "game-won-screen": "flex", others: "none" }
+    start: { "start-screen": "flex", others: "none" },
+    game: { canvas: "block", others: "none" },
+    over: { "game-over": "block", "game-over-screen": "flex", others: "none" },
+    won: { "game-won": "block", "game-won-screen": "flex", others: "none" },
   };
-  
-  screens.forEach(id => {
+
+  screens.forEach((id) => {
     const element = document.getElementById(id);
     if (element) element.style.display = visibility[screen][id] || visibility[screen].others;
   });
-  
+
   document.getElementById("mute-button").style.display = "block";
-  
+
   if (screen === "start") {
     setControlsVisibility();
     updateMuteIcon();
@@ -236,7 +242,7 @@ function showStartScreen() {
 }
 
 function bttnDisappear() {
-  ["restart-button", "menu-button"].forEach(id => {
+  ["restart-button", "menu-button"].forEach((id) => {
     const btn = document.getElementById(id);
     if (btn) btn.style.display = "none";
   });
@@ -248,8 +254,16 @@ function checkOrientation() {
   updateTouchToggleVisibility();
 }
 
-window.addEventListener("resize", () => { checkOrientation(); updateTouchToggleVisibility(); });
-window.addEventListener("orientationchange", () => setTimeout(() => { checkOrientation(); updateTouchToggleVisibility(); }, 100));
+window.addEventListener("resize", () => {
+  checkOrientation();
+  updateTouchToggleVisibility();
+});
+window.addEventListener("orientationchange", () =>
+  setTimeout(() => {
+    checkOrientation();
+    updateTouchToggleVisibility();
+  }, 100)
+);
 
 /**
  * Handles mute/unmute functionality with audio management
@@ -259,7 +273,7 @@ window.addEventListener("orientationchange", () => setTimeout(() => { checkOrien
 function handleMuteToggle(mute) {
   const icon = document.getElementById("mute-icon");
   icon.src = mute ? "./img/logo/mute.png" : "./img/logo/volume.png";
-  
+
   if (mute) {
     if (world && world.backgroundMusic) world.backgroundMusic.pause();
     if (world && world.endboss && world.endboss.endbossSfx) world.endboss.endbossSfx.pause();
@@ -295,7 +309,7 @@ function toggleMute() {
 
 function toggleCopyright() {
   const overlay = document.getElementById("copyright-overlay");
-  if (overlay) overlay.style.display = (overlay.style.display === "none" || overlay.style.display === "") ? "flex" : "none";
+  if (overlay) overlay.style.display = overlay.style.display === "none" || overlay.style.display === "" ? "flex" : "none";
 }
 
 function toggleControls() {
@@ -315,7 +329,7 @@ function toggleControls() {
 function toggleTouchControls() {
   const touchControls = document.getElementById("touch-controls");
   const toggleButton = document.getElementById("touch-toggle");
-  
+
   if (touchControls && toggleButton) {
     const isVisible = touchControls.classList.contains("show");
     touchControls.classList.toggle("show");
@@ -325,11 +339,15 @@ function toggleTouchControls() {
 }
 
 /**
- * Checks if device should show touch toggle button
+ * Checks if device should show touch toggle button (tablets only, not phones)
  * @function
  */
 function shouldShowTouchToggle() {
-  return ("ontouchstart" in window || navigator.maxTouchPoints > 0) && window.innerWidth >= 768;
+  const isTouchDevice = "ontouchstart" in window || navigator.maxTouchPoints > 0;
+  const isTabletSize = window.innerWidth >= 768 && window.innerHeight >= 600;
+  const isNotPhone = window.innerWidth >= 768 && !(window.innerWidth < 900 && window.innerHeight < 600);
+
+  return isTouchDevice && isTabletSize && isNotPhone;
 }
 
 /**
@@ -339,7 +357,7 @@ function shouldShowTouchToggle() {
 function updateTouchToggleVisibility() {
   const toggleButton = document.getElementById("touch-toggle");
   const touchControls = document.getElementById("touch-controls");
-  
+
   if (toggleButton && touchControls) {
     if (shouldShowTouchToggle()) {
       toggleButton.style.display = "flex";
@@ -368,20 +386,20 @@ function initTouchControls() {
   Object.entries(elements).forEach(([key, element]) => {
     if (element) {
       const keyMap = { touchLeft: "LEFT", touchRight: "RIGHT", touchThrow: "D", touchAttack: "SPACE" };
-      
+
       element.addEventListener("touchstart", (e) => {
         e.preventDefault();
         keyboard[keyMap[key]] = true;
       });
-      
+
       element.addEventListener("touchend", (e) => {
         e.preventDefault();
         keyboard[keyMap[key]] = false;
       });
-      
+
       element.addEventListener("touchcancel", (e) => {
         e.preventDefault();
-        Object.values(keyMap).forEach(k => keyboard[k] = false);
+        Object.values(keyMap).forEach((k) => (keyboard[k] = false));
       });
     }
   });
@@ -394,5 +412,9 @@ document.addEventListener("DOMContentLoaded", async function () {
   await ResourcePreloader.preloadAll();
 });
 
-function showGameOver() { setGameScreens("over"); }
-function showGameWon() { setGameScreens("won"); }
+function showGameOver() {
+  setGameScreens("over");
+}
+function showGameWon() {
+  setGameScreens("won");
+}
