@@ -44,6 +44,13 @@ class Endboss extends MoveableObject {
     "img/4_enemie_boss_chicken/3_attack/G20.png",
   ];
 
+  /** @type {string[]} Hurt animation image paths */
+  IMAGES_HURT = [
+    "img/4_enemie_boss_chicken/4_hurt/G21.png",
+    "img/4_enemie_boss_chicken/4_hurt/G22.png",
+    "img/4_enemie_boss_chicken/4_hurt/G23.png",
+  ];
+
   /** @type {string[]} Death animation image paths */
   IMAGES_DEAD = [
     "img/4_enemie_boss_chicken/5_dead/G24.png",
@@ -86,6 +93,7 @@ class Endboss extends MoveableObject {
     this.loadImages(this.IMAGES_ALERT);
     this.loadImages(this.IMAGES_WALK);
     this.loadImages(this.IMAGES_ATTACK);
+    this.loadImages(this.IMAGES_HURT);
     this.loadImages(this.IMAGES_DEAD);
     this.x = 2800;
     this.y = -400;
@@ -118,7 +126,7 @@ class Endboss extends MoveableObject {
 
   handleBossMovement(char) {
     let distance = this.x - char.x;
-    if (Math.abs(distance) > 100) {
+    if (Math.abs(distance) > 30) {
       this.playAnimation(this.IMAGES_WALK);
       if (char.x < this.x) {
         this.otherDirection = false;
@@ -133,6 +141,7 @@ class Endboss extends MoveableObject {
   }
 
   startBehavior(char) {
+    this.character = char;
     this.initializeBoss();
     this.startBossMusic();
     this.animationInterval = setInterval(() => {
@@ -149,6 +158,7 @@ class Endboss extends MoveableObject {
 
   stopAnimation() {
     clearInterval(this.animationInterval);
+    clearInterval(this.hurtAnimationInterval);
   }
 
   getRealFrame() {
@@ -197,6 +207,31 @@ class Endboss extends MoveableObject {
 
     if (this.energy === 0) {
       this.die();
+    } else {
+      this.playHurtAnimation();
+    }
+  }
+
+  playHurtAnimation() {
+    this.stopAnimation();
+    let imageIndex = 0;
+
+    this.hurtAnimationInterval = setInterval(() => {
+      if (imageIndex < this.IMAGES_HURT.length) {
+        this.img = this.imageCache[this.IMAGES_HURT[imageIndex]];
+        imageIndex++;
+      } else {
+        clearInterval(this.hurtAnimationInterval);
+        this.resumeNormalBehavior();
+      }
+    }, 150);
+  }
+
+  resumeNormalBehavior() {
+    if (this.character) {
+      this.animationInterval = setInterval(() => {
+        this.handleBossMovement(this.character);
+      }, 150);
     }
   }
 

@@ -91,6 +91,9 @@ class ResourcePreloader {
       "img/6_salsa_bottle/bottle_rotation/bottle_splash/4_bottle_splash.png",
       "img/6_salsa_bottle/bottle_rotation/bottle_splash/5_bottle_splash.png",
       "img/6_salsa_bottle/bottle_rotation/bottle_splash/6_bottle_splash.png",
+      "img/4_enemie_boss_chicken/4_hurt/G21.png",
+      "img/4_enemie_boss_chicken/4_hurt/G22.png",
+      "img/4_enemie_boss_chicken/4_hurt/G23.png",
     ];
 
     const loadPromises = imagePaths.map((path) => this.preloadImage(path));
