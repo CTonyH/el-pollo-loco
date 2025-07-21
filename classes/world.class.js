@@ -102,7 +102,7 @@ class World {
       let bottle = new ThrowableObject(throwX, this.char.y + 100, this.char.otherDirection);
       this.throwableObjects.push(bottle);
       this.char.bottles -= 1;
-      this.bottlesBar.setPercentage(this.char.bottles * 10);
+      this.updateBottleStatusBar();
       this.canThrow = false;
       setInterval(() => {
         this.canThrow = true;
@@ -181,8 +181,10 @@ class World {
 
   awardCoinCompletionBonus() {
     this.coinBonusAwarded = true;
-    this.char.bottles += 5;
-    this.bottlesBar.setPercentage(this.char.bottles * 10);
+    const maxBottles = 10;
+    const bottlesToAdd = Math.min(5, maxBottles - this.char.bottles);
+    this.char.bottles += bottlesToAdd;
+    this.updateBottleStatusBar();
     this.showCoinCompletionEffect();
     this.playBonusSound();
   }
@@ -230,14 +232,18 @@ class World {
 
   checkBottleCollisions() {
     this.level.bottles.forEach((bottle, index) => {
-      if (this.char.isColliding(bottle)) {
+      if (this.char.isColliding(bottle) && this.char.bottles < 10) {
         this.char.bottles += 1;
-        const percent = Math.min(100, (this.char.bottles / this.maxBottles) * 100);
-        this.bottlesBar.setPercentage(percent);
-        this.bottlesBar.setPercentage(this.char.bottles * 10);
+        this.updateBottleStatusBar();
         this.level.bottles.splice(index, 1);
       }
     });
+  }
+
+  updateBottleStatusBar() {
+    const maxBottles = 10;
+    const percentage = Math.min(100, (this.char.bottles / maxBottles) * 100);
+    this.bottlesBar.setPercentage(percentage);
   }
 
   checkThrowableCollisions() {
