@@ -112,6 +112,12 @@ class Char extends MoveableObject {
   /** @type {number} Timestamp of last hit for damage cooldown */
   lastHit = 0;
 
+  /** @type {boolean} Whether jump animation is currently playing */
+  isJumpAnimationPlaying = false;
+
+  /** @type {number} Current frame of jump animation */
+  jumpAnimationFrame = 0;
+
   /**
    * Creates a new character instance
    * @param {World} world - The game world instance
@@ -131,6 +137,8 @@ class Char extends MoveableObject {
 
     this.x = 100;
     this.y = 180;
+    this.bottles = 0;
+    this.coins = 0;
     this.animate();
     this.applyGravity();
     this.idleTime = null;
@@ -183,12 +191,14 @@ class Char extends MoveableObject {
       this.playAnimation(this.IMAGES_HURT);
       this.resetIdleTimer();
     } else if (this.isAboveGround()) {
-      this.playAnimation(this.IMAGES_JUMPING);
+      this.handleJumpAnimation();
       this.resetIdleTimer();
     } else if (this.world.keyboard.RIGHT || this.world.keyboard.LEFT) {
+      this.resetJumpAnimation();
       this.playAnimation(this.IMAGES_WALKING);
       this.resetIdleTimer();
     } else {
+      this.resetJumpAnimation();
       this.getIdleAnimation();
     }
   }
@@ -211,6 +221,35 @@ class Char extends MoveableObject {
   resetIdleTimer() {
     this.lastMovement = new Date().getTime();
     this.idleTime = null;
+  }
+
+  handleJumpAnimation() {
+    if (!this.isJumpAnimationPlaying) {
+      this.isJumpAnimationPlaying = true;
+      this.jumpAnimationFrame = 0;
+    }
+
+    if (this.jumpAnimationFrame < this.IMAGES_JUMPING.length) {
+      let path = this.IMAGES_JUMPING[this.jumpAnimationFrame];
+      this.img = this.imageCache[path];
+      this.jumpAnimationFrame++;
+    } else {
+      // Hold on last frame
+      let path = this.IMAGES_JUMPING[this.IMAGES_JUMPING.length - 1];
+      this.img = this.imageCache[path];
+    }
+  }
+
+  resetJumpAnimation() {
+    this.isJumpAnimationPlaying = false;
+    this.jumpAnimationFrame = 0;
+  }
+
+  jump() {
+    this.speedY = 30;
+    AudioManager.safePlay("audio/jump.mp3", 0.3);
+    // Reset jump animation for new jump
+    this.resetJumpAnimation();
   }
 
   triggerDeathAnimation() {
