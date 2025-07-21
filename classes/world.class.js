@@ -75,12 +75,19 @@ class World {
     }
     this.render();
     this.setWorld();
+    this.initializeStatusBars();
     this.run();
     this.gameOver = false;
     this.maxCoins = this.level.coins.length;
     this.maxBottles = this.level.bottles.length;
     this.endboss = this.level.enemies.find((e) => e instanceof Endboss);
     this.canThrow = true;
+  }
+
+  initializeStatusBars() {
+    this.statusBar.setPercentage(this.char.energy);
+    this.coinsBar.setPercentage(0);
+    this.bottlesBar.setPercentage(0);
   }
 
   setWorld() {
@@ -104,9 +111,9 @@ class World {
       this.char.bottles -= 1;
       this.updateBottleStatusBar();
       this.canThrow = false;
-      setInterval(() => {
+      setTimeout(() => {
         this.canThrow = true;
-      }, 1000);
+      }, 500);
     }
   }
 
@@ -248,7 +255,10 @@ class World {
 
   checkThrowableCollisions() {
     this.throwableObjects.forEach((bottle) => {
-      if (!bottle.broken && this.endboss && bottle.isColliding(this.endboss)) {
+      if (bottle.broken) return;
+
+      // Check collision with endboss
+      if (this.endboss && bottle.isColliding(this.endboss)) {
         const endbossInLevel = this.level.enemies.find((e) => e instanceof Endboss && e.id === this.endboss.id);
         if (endbossInLevel) {
           bottle.break();
@@ -256,6 +266,17 @@ class World {
           this.endbossBar.setPercentage(this.endboss.energy);
         }
       }
+
+      // Check collision with chickens and little chicks
+      this.level.enemies.forEach((enemy) => {
+        if (!enemy.defeated && bottle.isColliding(enemy)) {
+          bottle.break();
+          enemy.gotHit();
+          if (typeof AudioManager !== "undefined") {
+            AudioManager.safePlay("audio/damage.mp3", 0.5);
+          }
+        }
+      });
     });
   }
 
@@ -297,9 +318,9 @@ class World {
     this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
     this.ctx.translate(this.camera_x, 0);
     this.addObjectsToMap(this.level.backgroundObjects);
+    this.addObjectsToMap(this.level.clouds);
     this.addToMap(this.char);
     this.checkBossTrigger();
-    this.addObjectsToMap(this.level.clouds);
     this.addObjectsToMap(this.throwableObjects);
     this.addObjectsToMap(this.level.enemies);
     this.addObjectsToMap(this.level.coins);
@@ -338,15 +359,25 @@ class World {
 
   startBackgroundMusic() {
     if (!isMuted && this.backgroundMusic) {
-      this.backgroundMusic.currentTime = 0;
-      this.backgroundMusic.play().catch((e) => console.log("Background music failed:", e));
+      if (this.backgroundMusic.paused) {
+        // Resume if paused
+        this.backgroundMusic.play().catch((e) => console.log("Background music failed:", e));
+      } else if (this.backgroundMusic.currentTime === 0) {
+        // Start from beginning only if not started yet
+        this.backgroundMusic.play().catch((e) => console.log("Background music failed:", e));
+      }
     }
   }
 
   stopBackgroundMusic() {
     if (this.backgroundMusic) {
       this.backgroundMusic.pause();
-      this.backgroundMusic.currentTime = 0;
+    }
+  }
+
+  pauseBackgroundMusic() {
+    if (this.backgroundMusic) {
+      this.backgroundMusic.pause();
     }
   }
 
