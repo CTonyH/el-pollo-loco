@@ -4,20 +4,14 @@ body {
   align-items: center;
   justify-content: center;
   height: 100vh;
+  margin: 0;
   overflow-y: hidden;
   background: url("./img/bg.jpg") center/cover;
-  margin: 0;
 }
 
 @font-face {
   font-family: "Fredericka";
   src: url("./fonts/Fredericka_the_Great/FrederickatheGreat-Regular.ttf") format("truetype");
-}
-
-h1 {
-  font-family: "Fredericka";
-  font-size: 52px;
-  color: chocolate;
 }
 
 canvas {
@@ -97,7 +91,7 @@ button:active {
 }
 
 #start-screen {
-  position: absolute;
+  height: 100vh;
 }
 
 #start-screen-img {
@@ -162,6 +156,9 @@ button:active {
   align-items: center;
   justify-content: center;
   backdrop-filter: blur(3px);
+  font-family: "Fredericka";
+  color: #fff5e1;
+  text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.7);
 }
 
 #mute-button {
@@ -169,18 +166,12 @@ button:active {
 }
 #copyright-button {
   right: 70px;
-  font-family: "Fredericka";
   font-size: 24px;
-  color: #fff5e1;
-  text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.7);
 }
 #touch-toggle {
   left: 20px;
   display: none;
-  font-family: "Fredericka";
   font-size: 18px;
-  color: #fff5e1;
-  text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.7);
 }
 
 #mute-button:hover,
@@ -208,10 +199,6 @@ button:active {
   top: 50%;
   left: 50%;
   transform: translate(-50%, -50%);
-}
-
-#copyright-button:hover {
-  color: #fff;
 }
 
 .overlay-modal {
@@ -446,7 +433,6 @@ button:active {
   height: 45px;
   font-size: 14px;
 }
-
 .action-btn {
   width: 55px;
   height: 55px;
@@ -499,6 +485,9 @@ button:active {
   }
   #touch-toggle {
     display: none !important;
+  }
+  #start-screen {
+    height: auto;
   }
 }
 
@@ -592,17 +581,17 @@ button:active {
 }
 
 @media (max-width: 480px) {
-  #mute-button {
+  #mute-button,
+  #copyright-button {
     top: 15px;
-    right: 15px;
     width: 38px;
     height: 38px;
   }
+  #mute-button {
+    right: 15px;
+  }
   #copyright-button {
-    top: 15px;
     right: 60px;
-    width: 38px;
-    height: 38px;
     font-size: 20px;
   }
   .touch-controls {
@@ -630,17 +619,17 @@ button:active {
 }
 
 @media (min-width: 481px) and (max-width: 720px) {
-  #mute-button {
+  #mute-button,
+  #copyright-button {
     top: 18px;
-    right: 18px;
     width: 40px;
     height: 40px;
   }
+  #mute-button {
+    right: 18px;
+  }
   #copyright-button {
-    top: 18px;
     right: 65px;
-    width: 40px;
-    height: 40px;
     font-size: 22px;
   }
   .touch-controls {
@@ -657,25 +646,3 @@ button:active {
   }
 }
 
-@media (min-width: 768px) {
-  #touch-toggle {
-    top: 20px;
-    left: 20px;
-    width: 42px;
-    height: 42px;
-    font-size: 18px;
-  }
-  #mute-button {
-    top: 20px;
-    right: 20px;
-    width: 42px;
-    height: 42px;
-  }
-  #copyright-button {
-    top: 20px;
-    right: 70px;
-    width: 42px;
-    height: 42px;
-    font-size: 24px;
-  }
-}
