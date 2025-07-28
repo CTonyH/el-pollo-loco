@@ -197,6 +197,10 @@ class Char extends MoveableObject {
       this.resetJumpAnimation();
       this.playAnimation(this.IMAGES_WALKING);
       this.resetIdleTimer();
+    } else if (this.world.keyboard.D) {
+      this.resetJumpAnimation();
+      this.resetIdleTimer();
+      this.playAnimation(this.IMAGES_IDLE);
     } else {
       this.resetJumpAnimation();
       this.getIdleAnimation();
@@ -234,7 +238,6 @@ class Char extends MoveableObject {
       this.img = this.imageCache[path];
       this.jumpAnimationFrame++;
     } else {
-      // Hold on last frame
       let path = this.IMAGES_JUMPING[this.IMAGES_JUMPING.length - 1];
       this.img = this.imageCache[path];
     }
@@ -248,7 +251,6 @@ class Char extends MoveableObject {
   jump() {
     this.speedY = 30;
     AudioManager.safePlay("audio/jump.mp3", 0.3);
-    // Reset jump animation for new jump
     this.resetJumpAnimation();
   }
 
