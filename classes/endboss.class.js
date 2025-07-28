@@ -99,6 +99,10 @@ class Endboss extends MoveableObject {
     this.y = -400;
     this.id = "Endboss_" + Date.now();
     this.energy = 100;
+    this.lastHitTime = 0;
+    this.hitCooldown = 800;
+    this.enraged = false;
+    this.speedMultiplier = 1;
     this.offset = {
       top: 50,
       left: 50,
@@ -126,7 +130,9 @@ class Endboss extends MoveableObject {
 
   handleBossMovement(char) {
     let distance = this.x - char.x;
-    if (Math.abs(distance) > 30) {
+    let attackRange = this.enraged ? 50 : 30;
+
+    if (Math.abs(distance) > attackRange) {
       this.playAnimation(this.IMAGES_WALK);
       if (char.x < this.x) {
         this.otherDirection = false;
@@ -137,6 +143,17 @@ class Endboss extends MoveableObject {
       }
     } else {
       this.playAnimation(this.IMAGES_ATTACK);
+
+      if (this.enraged && Math.random() < 0.3) {
+        this.aggressiveAttack(char);
+      }
+    }
+  }
+
+  aggressiveAttack(char) {
+    if (Math.abs(this.x - char.x) > 20) {
+      const direction = char.x < this.x ? -1 : 1;
+      this.x += direction * 15 * this.speedMultiplier;
     }
   }
 
@@ -194,22 +211,43 @@ class Endboss extends MoveableObject {
   }
 
   moveLeft() {
-    this.x -= 30;
+    this.x -= 30 * this.speedMultiplier;
   }
 
   moveRight() {
-    this.x += 30;
+    this.x += 30 * this.speedMultiplier;
   }
 
   hit() {
-    this.energy -= 20;
+    const currentTime = Date.now();
+
+    if (currentTime - this.lastHitTime < this.hitCooldown) {
+      return;
+    }
+
+    this.lastHitTime = currentTime;
+    this.energy -= 10;
     if (this.energy < 0) this.energy = 0;
+
+    if (this.energy <= 40 && !this.enraged) {
+      this.enraged = true;
+      this.speedMultiplier = 1.5;
+      this.hitCooldown = 600;
+    }
 
     if (this.energy === 0) {
       this.die();
     } else {
       this.playHurtAnimation();
     }
+  }
+
+  /**
+   * Alternative method name for consistency with other enemies
+   * @function
+   */
+  gotHit() {
+    this.hit();
   }
 
   playHurtAnimation() {
@@ -224,14 +262,15 @@ class Endboss extends MoveableObject {
         clearInterval(this.hurtAnimationInterval);
         this.resumeNormalBehavior();
       }
-    }, 150);
+    }, 80);
   }
 
   resumeNormalBehavior() {
     if (this.character) {
+      const interval = this.enraged ? 120 : 150;
       this.animationInterval = setInterval(() => {
         this.handleBossMovement(this.character);
-      }, 150);
+      }, interval);
     }
   }
 
