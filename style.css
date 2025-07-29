@@ -514,6 +514,16 @@ button:active {
   }
 }
 
+/* Large phones and small tablets (768px - 900px) with touch */
+@media (min-width: 768px) and (max-width: 900px) and (hover: none) and (pointer: coarse) {
+  .touch-controls {
+    display: block;
+  }
+  #touch-toggle {
+    display: flex;
+  }
+}
+
 @media (max-width: 1024px) {
   .game-over-img img,
   #game-won-img img {
@@ -540,7 +550,7 @@ button:active {
     display: flex;
   }
   .touch-controls {
-    display: none !important;
+    display: block;
   }
   .touch-controls.show {
     display: block !important;
@@ -645,4 +655,3 @@ button:active {
     gap: 7px;
   }
 }
-
