@@ -81,12 +81,43 @@ class Endboss extends MoveableObject {
   /** @type {number} Animation interval reference */
   animationInterval;
 
+  /** @type {number} Hurt animation interval reference */
+  hurtAnimationInterval;
+
+  /** @type {number} Death animation interval reference */
+  deathAnimation;
+
   /** @type {boolean} Whether the game has been won */
   gameWon = false;
+
+  /** @type {string} Unique identifier for the endboss */
+  id;
+
+  /** @type {number} Timestamp of last hit taken */
+  lastHitTime = 0;
+
+  /** @type {number} Cooldown time between hits in milliseconds */
+  hitCooldown = 800;
+
+  /** @type {boolean} Whether the boss is in enraged state */
+  enraged = false;
+
+  /** @type {number} Speed multiplier for enraged mode */
+  speedMultiplier = 1;
+
+  /** @type {HTMLAudioElement} Audio element for boss music */
+  endbossSound;
+
+  /** @type {Object} Reference to the character object */
+  character;
+
+  /** @type {boolean} Whether the boss is marked for deletion */
+  markedForDeletion = false;
 
   /**
    * Creates a new endboss instance
    * Initializes the boss with images and starting position
+   * @constructor
    */
   constructor() {
     super().loadImage(this.IMAGES_ALERT[0]);
@@ -111,6 +142,11 @@ class Endboss extends MoveableObject {
     };
   }
 
+  /**
+   * Initializes the boss encounter
+   * Stops current animations and background music
+   * @method
+   */
   initializeBoss() {
     this.stopAnimation();
     if (world && world.stopBackgroundMusic) {
@@ -118,6 +154,10 @@ class Endboss extends MoveableObject {
     }
   }
 
+  /**
+   * Starts playing the boss battle music
+   * @method
+   */
   startBossMusic() {
     this.endbossSound = AudioManager.getAudio("audio/endboss.mp3");
     if (this.endbossSound && !isMuted) {
@@ -128,6 +168,16 @@ class Endboss extends MoveableObject {
     }
   }
 
+  /**
+   * Handles boss movement and attack behavior based on character position
+   * @method
+   * @param {Object} char - The character object to track and attack
+   */
+  /**
+   * Handles boss movement and attack behavior based on character position
+   * @method
+   * @param {Object} char - The character object to track and attack
+   */
   handleBossMovement(char) {
     let distance = this.x - char.x;
     let attackRange = this.enraged ? 50 : 30;
@@ -150,6 +200,11 @@ class Endboss extends MoveableObject {
     }
   }
 
+  /**
+   * Performs an aggressive attack when boss is enraged
+   * @method
+   * @param {Object} char - The character object to attack
+   */
   aggressiveAttack(char) {
     if (Math.abs(this.x - char.x) > 20) {
       const direction = char.x < this.x ? -1 : 1;
@@ -157,6 +212,11 @@ class Endboss extends MoveableObject {
     }
   }
 
+  /**
+   * Starts the boss behavior sequence
+   * @method
+   * @param {Object} char - The character object to interact with
+   */
   startBehavior(char) {
     this.character = char;
     this.initializeBoss();
@@ -166,6 +226,10 @@ class Endboss extends MoveableObject {
     }, 150);
   }
 
+  /**
+   * Stops the endboss background music
+   * @method
+   */
   stopEndbossSound() {
     if (this.endbossSound) {
       this.endbossSound.pause();
@@ -173,11 +237,19 @@ class Endboss extends MoveableObject {
     }
   }
 
+  /**
+   * Stops all running animations and intervals
+   * @method
+   */
   stopAnimation() {
     clearInterval(this.animationInterval);
     clearInterval(this.hurtAnimationInterval);
   }
 
+  /**
+   * Calculates real frame boundaries for accurate collision detection
+   * @method
+   */
   getRealFrame() {
     this.rX = this.x + this.offset.left;
     this.rY = this.y + this.offset.top;
@@ -185,11 +257,20 @@ class Endboss extends MoveableObject {
     this.rH = this.height - this.offset.top - this.offset.bottom;
   }
 
+  /**
+   * Draws the endboss on the canvas
+   * @method
+   * @param {CanvasRenderingContext2D} ctx - The canvas rendering context
+   */
   draw(ctx) {
     this.getRealFrame();
     super.draw(ctx);
   }
 
+  /**
+   * Plays the alert animation when boss is first encountered
+   * @method
+   */
   animateAlert() {
     this.stopAnimation();
     this.animationInterval = setInterval(() => {
@@ -197,6 +278,11 @@ class Endboss extends MoveableObject {
     }, 200);
   }
 
+  /**
+   * Makes the boss fly in from above
+   * @method
+   * @param {Function} onComplete - Callback function to execute when fly-in is complete
+   */
   flyIn(onComplete) {
     let interval = setInterval(() => {
       if (this.y < 45) {
@@ -210,14 +296,27 @@ class Endboss extends MoveableObject {
     }, 30);
   }
 
+  /**
+   * Moves the boss to the left
+   * @method
+   */
   moveLeft() {
     this.x -= 30 * this.speedMultiplier;
   }
 
+  /**
+   * Moves the boss to the right
+   * @method
+   */
   moveRight() {
     this.x += 30 * this.speedMultiplier;
   }
 
+  /**
+   * Handles when the boss takes damage
+   * Implements cooldown system and enrage mechanics
+   * @method
+   */
   hit() {
     const currentTime = Date.now();
 
@@ -244,12 +343,16 @@ class Endboss extends MoveableObject {
 
   /**
    * Alternative method name for consistency with other enemies
-   * @function
+   * @method
    */
   gotHit() {
     this.hit();
   }
 
+  /**
+   * Plays the hurt animation when boss takes damage
+   * @method
+   */
   playHurtAnimation() {
     this.stopAnimation();
     let imageIndex = 0;
@@ -265,6 +368,10 @@ class Endboss extends MoveableObject {
     }, 80);
   }
 
+  /**
+   * Resumes normal boss behavior after hurt animation
+   * @method
+   */
   resumeNormalBehavior() {
     if (this.character) {
       const interval = this.enraged ? 120 : 150;
@@ -274,6 +381,10 @@ class Endboss extends MoveableObject {
     }
   }
 
+  /**
+   * Handles boss death sequence
+   * @method
+   */
   die() {
     this.speed = 0;
     this.stopAnimation();
@@ -286,6 +397,10 @@ class Endboss extends MoveableObject {
     }, this.IMAGES_DEAD.length * 150 + 200);
   }
 
+  /**
+   * Plays the death animation sequence
+   * @method
+   */
   playDeathAnimation() {
     if (this.deathAnimation) return;
 
@@ -305,6 +420,10 @@ class Endboss extends MoveableObject {
     }, 400);
   }
 
+  /**
+   * Shows the game won screen and handles victory state
+   * @method
+   */
   gameWonScreen() {
     world.gameWon = true;
     if (world && world.stopGame) {
