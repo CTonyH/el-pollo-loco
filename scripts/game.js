@@ -206,20 +206,41 @@ function setGameScreens(screen) {
 }
 
 /**
- * Updates touch controls based on device type
+ * Updates touch controls based on device type and game state
  * @function
  */
 function updateTouchControls() {
   updateTouchToggleVisibility();
   const touchControls = document.getElementById("touch-controls");
   if (touchControls) {
-    if (window.innerWidth < 768) {
-      touchControls.style.display = "block";
-      touchControls.classList.remove("show");
-    } else if (shouldShowTouchToggle()) {
-      touchControls.style.display = touchControls.classList.contains("show") ? "block" : "none";
+    const isTouchDevice = "ontouchstart" in window || navigator.maxTouchPoints > 0;
+    const isGameActive = document.getElementById("canvas").style.display === "block";
+
+    if (isTouchDevice && isGameActive) {
+      if (window.innerWidth < 768) {
+        // Small screens (phones): Always show controls during gameplay
+        touchControls.style.display = "block";
+        touchControls.classList.add("show");
+      } else if (window.innerWidth >= 768 && window.innerWidth <= 1024) {
+        // Medium screens (large phones/tablets): Show controls by default, but allow toggling
+        if (!touchControls.hasAttribute("data-user-toggled")) {
+          // First time or reset - show by default
+          touchControls.style.display = "block";
+          touchControls.classList.add("show");
+        } else {
+          // User has toggled before - respect their choice
+          const isVisible = touchControls.classList.contains("show");
+          touchControls.style.display = isVisible ? "block" : "none";
+        }
+      } else {
+        // Large screens: Use toggle system during gameplay
+        touchControls.style.display = touchControls.classList.contains("show") ? "block" : "none";
+      }
     } else {
+      // Non-touch devices or not in game: Hide controls
       touchControls.style.display = "none";
+      touchControls.classList.remove("show");
+      touchControls.removeAttribute("data-user-toggled");
     }
   }
 }
@@ -323,7 +344,7 @@ function toggleControls() {
 }
 
 /**
- * Toggles touch controls visibility on tablets/iPads
+ * Toggles touch controls visibility on tablets/iPads and medium screens
  * @function
  */
 function toggleTouchControls() {
@@ -331,27 +352,46 @@ function toggleTouchControls() {
   const toggleButton = document.getElementById("touch-toggle");
 
   if (touchControls && toggleButton) {
-    const isVisible = touchControls.classList.contains("show");
-    touchControls.classList.toggle("show");
-    toggleButton.textContent = isVisible ? "📱" : "✕";
-    toggleButton.title = isVisible ? "Touch-Controls anzeigen" : "Touch-Controls verbergen";
+    const isCurrentlyVisible = touchControls.classList.contains("show") || touchControls.style.display === "block";
+
+    // Mark that user has manually toggled controls
+    touchControls.setAttribute("data-user-toggled", "true");
+
+    if (isCurrentlyVisible) {
+      // Hide controls
+      touchControls.classList.remove("show");
+      touchControls.style.display = "none";
+      toggleButton.textContent = "📱";
+      toggleButton.title = "Touch-Controls anzeigen";
+    } else {
+      // Show controls
+      touchControls.classList.add("show");
+      touchControls.style.display = "block";
+      toggleButton.textContent = "✕";
+      toggleButton.title = "Touch-Controls verbergen";
+    }
   }
 }
 
 /**
- * Checks if device should show touch toggle button (tablets only, not phones)
+ * Checks if device should show touch toggle button
  * @function
+ */
+/**
+ * Checks if touch toggle should be shown (only during active gameplay)
+ * @function
+ * @returns {boolean} True if toggle should be shown
  */
 function shouldShowTouchToggle() {
   const isTouchDevice = "ontouchstart" in window || navigator.maxTouchPoints > 0;
-  const isTabletSize = window.innerWidth >= 768 && window.innerHeight >= 600;
-  const isNotPhone = window.innerWidth >= 768 && !(window.innerWidth < 900 && window.innerHeight < 600);
+  const isLargeTablet = window.innerWidth >= 1024 && window.innerHeight >= 768;
+  const isGameActive = document.getElementById("canvas").style.display === "block";
 
-  return isTouchDevice && isTabletSize && isNotPhone;
+  return isTouchDevice && isLargeTablet && isGameActive;
 }
 
 /**
- * Updates touch toggle button visibility based on device
+ * Updates touch toggle button visibility based on device and game state
  * @function
  */
 function updateTouchToggleVisibility() {
@@ -359,14 +399,27 @@ function updateTouchToggleVisibility() {
   const touchControls = document.getElementById("touch-controls");
 
   if (toggleButton && touchControls) {
-    if (shouldShowTouchToggle()) {
+    const isTouchDevice = "ontouchstart" in window || navigator.maxTouchPoints > 0;
+    const isGameActive = document.getElementById("canvas").style.display === "block";
+
+    if (isTouchDevice && isGameActive && window.innerWidth >= 768 && window.innerWidth < 1024) {
+      // Medium screens (large phones/small tablets): Show toggle during gameplay
       toggleButton.style.display = "flex";
-      touchControls.classList.remove("show");
-      toggleButton.textContent = "📱";
-      toggleButton.title = "Touch-Controls anzeigen";
+      const isVisible = touchControls.classList.contains("show") || touchControls.style.display === "block";
+      toggleButton.textContent = isVisible ? "✕" : "📱";
+      toggleButton.title = isVisible ? "Touch-Controls verbergen" : "Touch-Controls anzeigen";
+    } else if (shouldShowTouchToggle()) {
+      // Large tablets during gameplay: Show toggle
+      toggleButton.style.display = "flex";
+      const isVisible = touchControls.classList.contains("show");
+      toggleButton.textContent = isVisible ? "✕" : "📱";
+      toggleButton.title = isVisible ? "Touch-Controls verbergen" : "Touch-Controls anzeigen";
     } else {
+      // Small screens, desktop, or not in game: Hide toggle
       toggleButton.style.display = "none";
-      touchControls.classList.remove("show");
+      if (!isGameActive) {
+        touchControls.classList.remove("show");
+      }
     }
   }
 }
@@ -413,8 +466,10 @@ document.addEventListener("DOMContentLoaded", async function () {
 });
 
 function showGameOver() {
+  if (world && world.playGameOverSound) world.playGameOverSound();
   setGameScreens("over");
 }
 function showGameWon() {
+  if (world && world.playWinSound) world.playWinSound();
   setGameScreens("won");
 }
