@@ -46,19 +46,14 @@ function manageMainMenuMusic(action) {
   if (action === "start" && !isMuted) {
     if (!mainMenuMusic) {
       mainMenuMusic = AudioManager.getAudio("audio/main-menu.mp3");
-      if (mainMenuMusic) {
-        mainMenuMusic.loop = true;
-        mainMenuMusic.volume = 0.3;
-        mainMenuMusic.play().catch((e) => console.log("Main menu music failed:", e));
-      }
-    } else if (mainMenuMusic.paused) {
-      mainMenuMusic.play().catch((e) => console.log("Main menu music resume failed:", e));
+      if (mainMenuMusic) Object.assign(mainMenuMusic, { loop: true, volume: 0.3 });
     }
-  } else if (action === "pause" && mainMenuMusic && !mainMenuMusic.paused) {
+    mainMenuMusic?.play?.().catch((e) => console.log("Main menu music failed:", e));
+  } else if (action === "pause" && mainMenuMusic?.paused === false) {
     mainMenuMusic.pause();
   } else if (action === "stop" && mainMenuMusic) {
+    Object.assign(mainMenuMusic, { currentTime: 0 });
     mainMenuMusic.pause();
-    mainMenuMusic.currentTime = 0;
     mainMenuMusic = null;
   }
 }
@@ -73,21 +68,6 @@ function init() {
 }
 
 /**
- * Sets the state of keyboard keys based on key code
- * @param {number} keyCode - The key code from the keyboard event
- * @param {boolean} state - The state to set (true for pressed, false for released)
- * @function
- */
-function setKeyState(keyCode, state) {
-  if (keyCode == 39) keyboard.RIGHT = state;
-  if (keyCode == 37) keyboard.LEFT = state;
-  if (keyCode == 40) keyboard.DOWN = state;
-  if (keyCode == 38) keyboard.UP = state;
-  if (keyCode == 32) keyboard.SPACE = state;
-  if (keyCode == 68) keyboard.D = state;
-}
-
-/**
  * Handles keydown and keyup events for game controls
  * @param {KeyboardEvent} e - The keyboard event
  * @param {boolean} isDown - True for keydown, false for keyup
@@ -95,7 +75,8 @@ function setKeyState(keyCode, state) {
  */
 function handleKeyEvent(e, isDown) {
   if (world?.gameOver || !world?.gameRunning) return;
-  setKeyState(e.keyCode, isDown);
+  const keyMap = { 39: "RIGHT", 37: "LEFT", 40: "DOWN", 38: "UP", 32: "SPACE", 68: "D" };
+  if (keyMap[e.keyCode]) keyboard[keyMap[e.keyCode]] = isDown;
 }
 
 window.addEventListener("keydown", (e) => handleKeyEvent(e, true));
@@ -108,20 +89,11 @@ window.addEventListener("keyup", (e) => handleKeyEvent(e, false));
 function stopAllSounds() {
   AudioManager.stopAll();
   if (world) {
-    if (world.winSfx) {
-      world.winSfx.pause();
-      world.winSfx.currentTime = 0;
-    }
-    if (world.gameOverSfx) {
-      world.gameOverSfx.pause();
-      world.gameOverSfx.currentTime = 0;
-    }
-    if (world.stopBackgroundMusic) world.stopBackgroundMusic();
-    if (world.char) {
-      if (world.char.stopWalkSound) world.char.stopWalkSound();
-      if (world.char.stopSnoreSound) world.char.stopSnoreSound();
-    }
-    if (world.endboss && world.endboss.stopEndbossSound) world.endboss.stopEndbossSound();
+    [world.winSfx, world.gameOverSfx].forEach((sfx) => sfx && (sfx.pause(), (sfx.currentTime = 0)));
+    world.stopBackgroundMusic?.();
+    world.char?.stopWalkSound?.();
+    world.char?.stopSnoreSound?.();
+    world.endboss?.stopEndbossSound?.();
   }
 }
 
@@ -133,13 +105,11 @@ function cleanupWorld() {
   if (world) {
     if (world.animationFrameId) cancelAnimationFrame(world.animationFrameId);
     world.throwableObjects = [];
-    if (world.level && world.level.enemies) {
-      world.level.enemies.forEach((enemy) => {
-        if (enemy.animationInterval) clearInterval(enemy.animationInterval);
-        if (enemy.stopEndbossSound) enemy.stopEndbossSound();
-      });
-      world.level.enemies = [];
-    }
+    world.level?.enemies?.forEach((enemy) => {
+      if (enemy.animationInterval) clearInterval(enemy.animationInterval);
+      enemy.stopEndbossSound?.();
+    });
+    if (world.level) world.level.enemies = [];
     world = null;
   }
   if (typeof level1 !== "undefined") level1 = null;
@@ -167,7 +137,7 @@ async function startGame() {
   initLevel();
   init();
   setTimeout(() => {
-    if (world && world.startBackgroundMusic && !isMuted) world.startBackgroundMusic();
+    if (world?.startBackgroundMusic && !isMuted) world.startBackgroundMusic();
   }, 100);
 }
 
@@ -191,6 +161,7 @@ function setGameScreens(screen) {
   });
 
   document.getElementById("mute-button").style.display = "block";
+  const touchControls = document.getElementById("touch-controls");
 
   if (screen === "start") {
     setControlsVisibility();
@@ -199,10 +170,7 @@ function setGameScreens(screen) {
   } else if (screen === "game") {
     manageMainMenuMusic("pause");
     updateTouchControls();
-  } else {
-    const touchControls = document.getElementById("touch-controls");
-    if (touchControls) touchControls.style.display = "none";
-  }
+  } else if (touchControls) touchControls.style.display = "none";
 }
 
 /**
@@ -212,36 +180,27 @@ function setGameScreens(screen) {
 function updateTouchControls() {
   updateTouchToggleVisibility();
   const touchControls = document.getElementById("touch-controls");
-  if (touchControls) {
-    const isTouchDevice = "ontouchstart" in window || navigator.maxTouchPoints > 0;
-    const isGameActive = document.getElementById("canvas").style.display === "block";
+  if (!touchControls) return;
 
-    if (isTouchDevice && isGameActive) {
-      if (window.innerWidth < 768) {
-        // Small screens (phones): Always show controls during gameplay
-        touchControls.style.display = "block";
-        touchControls.classList.add("show");
-      } else if (window.innerWidth >= 768 && window.innerWidth <= 1024) {
-        // Medium screens (large phones/tablets): Show controls by default, but allow toggling
-        if (!touchControls.hasAttribute("data-user-toggled")) {
-          // First time or reset - show by default
-          touchControls.style.display = "block";
-          touchControls.classList.add("show");
-        } else {
-          // User has toggled before - respect their choice
-          const isVisible = touchControls.classList.contains("show");
-          touchControls.style.display = isVisible ? "block" : "none";
-        }
-      } else {
-        // Large screens: Use toggle system during gameplay
-        touchControls.style.display = touchControls.classList.contains("show") ? "block" : "none";
-      }
+  const isTouchDevice = "ontouchstart" in window || navigator.maxTouchPoints > 0;
+  const isGameActive = document.getElementById("canvas").style.display === "block";
+  const width = window.innerWidth;
+
+  if (isTouchDevice && isGameActive) {
+    if (width < 768) {
+      touchControls.style.display = "block";
+      touchControls.classList.add("show");
+    } else if (width >= 768 && width <= 1024) {
+      const show = !touchControls.hasAttribute("data-user-toggled") || touchControls.classList.contains("show");
+      touchControls.style.display = show ? "block" : "none";
+      if (!touchControls.hasAttribute("data-user-toggled")) touchControls.classList.add("show");
     } else {
-      // Non-touch devices or not in game: Hide controls
-      touchControls.style.display = "none";
-      touchControls.classList.remove("show");
-      touchControls.removeAttribute("data-user-toggled");
+      touchControls.style.display = touchControls.classList.contains("show") ? "block" : "none";
     }
+  } else {
+    touchControls.style.display = "none";
+    touchControls.classList.remove("show");
+    touchControls.removeAttribute("data-user-toggled");
   }
 }
 
@@ -254,14 +213,22 @@ function setControlsVisibility() {
   if (controlsInfo) controlsInfo.style.display = window.innerWidth >= 1024 ? "block" : "none";
 }
 
+/**
+ * Returns to the start screen and resets game state
+ * @function
+ */
 function showStartScreen() {
   stopAllSounds();
   resetKeyboard();
-  if (world && world.stopGame) world.stopGame();
+  world?.stopGame?.();
   setGameScreens("start");
   bttnDisappear();
 }
 
+/**
+ * Hides restart and menu buttons
+ * @function
+ */
 function bttnDisappear() {
   ["restart-button", "menu-button"].forEach((id) => {
     const btn = document.getElementById(id);
@@ -269,6 +236,10 @@ function bttnDisappear() {
   });
 }
 
+/**
+ * Checks device orientation and shows rotation overlay if needed
+ * @function
+ */
 function checkOrientation() {
   const overlay = document.getElementById("rotate-screen");
   if (overlay) overlay.style.display = window.innerHeight > window.innerWidth ? "flex" : "none";
@@ -292,47 +263,49 @@ window.addEventListener("orientationchange", () =>
  * @function
  */
 function handleMuteToggle(mute) {
-  const icon = document.getElementById("mute-icon");
-  icon.src = mute ? "./img/logo/mute.png" : "./img/logo/volume.png";
+  document.getElementById("mute-icon").src = mute ? "./img/logo/mute.png" : "./img/logo/volume.png";
 
   if (mute) {
-    if (world && world.backgroundMusic) world.backgroundMusic.pause();
-    if (world && world.endboss && world.endboss.endbossSfx) world.endboss.endbossSfx.pause();
+    world?.backgroundMusic?.pause();
+    world?.endboss?.endbossSfx?.pause();
     manageMainMenuMusic("pause");
     AudioManager.stopAll();
-    if (world && world.char) {
-      world.char.stopWalkSound();
-      if (world.char.stopSnoreSound) world.char.stopSnoreSound();
-    }
+    world?.char?.stopWalkSound();
+    world?.char?.stopSnoreSound?.();
   } else {
-    if (world && world.gameRunning && !world.gameOver && !world.gameWon) {
-      if (world.endboss && world.bossBehaviorStarted) {
-        if (world.endboss.endbossSfx) world.endboss.endbossSfx.play().catch((e) => console.log("Endboss music failed:", e));
-      } else {
-        if (world.backgroundMusic && world.backgroundMusic.paused) {
-          world.backgroundMusic.play().catch((e) => console.log("Background music resume failed:", e));
-        } else {
-          world.startBackgroundMusic();
-        }
-      }
-    } else {
-      const startScreen = document.getElementById("start-screen");
-      if (startScreen && startScreen.style.display !== "none") manageMainMenuMusic("start");
-    }
+    if (world?.gameRunning && !world.gameOver && !world.gameWon) {
+      world.endboss?.endbossSfx && world.bossBehaviorStarted
+        ? world.endboss.endbossSfx.play().catch((e) => console.log("Endboss music failed:", e))
+        : world.backgroundMusic?.paused
+        ? world.backgroundMusic.play().catch((e) => console.log("Background music resume failed:", e))
+        : world.startBackgroundMusic();
+    } else if (document.getElementById("start-screen")?.style.display !== "none") manageMainMenuMusic("start");
   }
 }
 
+/**
+ * Toggles mute state and saves to localStorage
+ * @function
+ */
 function toggleMute() {
   isMuted = !isMuted;
   localStorage.setItem("elPolloLocoMuted", JSON.stringify(isMuted));
   handleMuteToggle(isMuted);
 }
 
+/**
+ * Toggles copyright overlay visibility
+ * @function
+ */
 function toggleCopyright() {
   const overlay = document.getElementById("copyright-overlay");
   if (overlay) overlay.style.display = overlay.style.display === "none" || overlay.style.display === "" ? "flex" : "none";
 }
 
+/**
+ * Toggles controls panel visibility and updates button text
+ * @function
+ */
 function toggleControls() {
   const panel = document.getElementById("controls-panel");
   const button = document.getElementById("controls-toggle");
@@ -353,30 +326,20 @@ function toggleTouchControls() {
 
   if (touchControls && toggleButton) {
     const isCurrentlyVisible = touchControls.classList.contains("show") || touchControls.style.display === "block";
-
-    // Mark that user has manually toggled controls
     touchControls.setAttribute("data-user-toggled", "true");
 
     if (isCurrentlyVisible) {
-      // Hide controls
       touchControls.classList.remove("show");
       touchControls.style.display = "none";
-      toggleButton.textContent = "📱";
-      toggleButton.title = "Touch-Controls anzeigen";
+      Object.assign(toggleButton, { textContent: "📱", title: "Touch-Controls anzeigen" });
     } else {
-      // Show controls
       touchControls.classList.add("show");
       touchControls.style.display = "block";
-      toggleButton.textContent = "✕";
-      toggleButton.title = "Touch-Controls verbergen";
+      Object.assign(toggleButton, { textContent: "✕", title: "Touch-Controls verbergen" });
     }
   }
 }
 
-/**
- * Checks if device should show touch toggle button
- * @function
- */
 /**
  * Checks if touch toggle should be shown (only during active gameplay)
  * @function
@@ -386,7 +349,6 @@ function shouldShowTouchToggle() {
   const isTouchDevice = "ontouchstart" in window || navigator.maxTouchPoints > 0;
   const isLargeTablet = window.innerWidth >= 1024 && window.innerHeight >= 768;
   const isGameActive = document.getElementById("canvas").style.display === "block";
-
   return isTouchDevice && isLargeTablet && isGameActive;
 }
 
@@ -397,30 +359,22 @@ function shouldShowTouchToggle() {
 function updateTouchToggleVisibility() {
   const toggleButton = document.getElementById("touch-toggle");
   const touchControls = document.getElementById("touch-controls");
+  if (!toggleButton || !touchControls) return;
 
-  if (toggleButton && touchControls) {
-    const isTouchDevice = "ontouchstart" in window || navigator.maxTouchPoints > 0;
-    const isGameActive = document.getElementById("canvas").style.display === "block";
+  const isTouchDevice = "ontouchstart" in window || navigator.maxTouchPoints > 0;
+  const isGameActive = document.getElementById("canvas").style.display === "block";
+  const width = window.innerWidth;
 
-    if (isTouchDevice && isGameActive && window.innerWidth >= 768 && window.innerWidth < 1024) {
-      // Medium screens (large phones/small tablets): Show toggle during gameplay
-      toggleButton.style.display = "flex";
-      const isVisible = touchControls.classList.contains("show") || touchControls.style.display === "block";
-      toggleButton.textContent = isVisible ? "✕" : "📱";
-      toggleButton.title = isVisible ? "Touch-Controls verbergen" : "Touch-Controls anzeigen";
-    } else if (shouldShowTouchToggle()) {
-      // Large tablets during gameplay: Show toggle
-      toggleButton.style.display = "flex";
-      const isVisible = touchControls.classList.contains("show");
-      toggleButton.textContent = isVisible ? "✕" : "📱";
-      toggleButton.title = isVisible ? "Touch-Controls verbergen" : "Touch-Controls anzeigen";
-    } else {
-      // Small screens, desktop, or not in game: Hide toggle
-      toggleButton.style.display = "none";
-      if (!isGameActive) {
-        touchControls.classList.remove("show");
-      }
-    }
+  if (isTouchDevice && isGameActive && ((width >= 768 && width < 1024) || shouldShowTouchToggle())) {
+    const isVisible = touchControls.classList.contains("show") || touchControls.style.display === "block";
+    Object.assign(toggleButton, {
+      style: { display: "flex" },
+      textContent: isVisible ? "✕" : "📱",
+      title: isVisible ? "Touch-Controls verbergen" : "Touch-Controls anzeigen",
+    });
+  } else {
+    toggleButton.style.display = "none";
+    if (!isGameActive) touchControls.classList.remove("show");
   }
 }
 
@@ -429,47 +383,44 @@ function updateTouchToggleVisibility() {
  * @function
  */
 function initTouchControls() {
-  const elements = {
-    touchLeft: document.getElementById("touch-left"),
-    touchRight: document.getElementById("touch-right"),
-    touchThrow: document.getElementById("touch-throw"),
-    touchAttack: document.getElementById("touch-attack"),
-  };
+  const elements = { touchLeft: "LEFT", touchRight: "RIGHT", touchThrow: "D", touchAttack: "SPACE" };
 
-  Object.entries(elements).forEach(([key, element]) => {
+  Object.entries(elements).forEach(([id, key]) => {
+    const element = document.getElementById(id.replace(/([A-Z])/g, "-$1").toLowerCase());
     if (element) {
-      const keyMap = { touchLeft: "LEFT", touchRight: "RIGHT", touchThrow: "D", touchAttack: "SPACE" };
-
-      element.addEventListener("touchstart", (e) => {
-        e.preventDefault();
-        keyboard[keyMap[key]] = true;
-      });
-
-      element.addEventListener("touchend", (e) => {
-        e.preventDefault();
-        keyboard[keyMap[key]] = false;
-      });
-
-      element.addEventListener("touchcancel", (e) => {
-        e.preventDefault();
-        Object.values(keyMap).forEach((k) => (keyboard[k] = false));
+      ["touchstart", "touchend", "touchcancel"].forEach((event) => {
+        element.addEventListener(event, (e) => {
+          e.preventDefault();
+          event === "touchcancel"
+            ? Object.values(elements).forEach((k) => (keyboard[k] = false))
+            : (keyboard[key] = event === "touchstart");
+        });
       });
     }
   });
 }
 
-document.addEventListener("DOMContentLoaded", async function () {
+document.addEventListener("DOMContentLoaded", async () => {
   initTouchControls();
   loadMuteStatus();
   updateTouchToggleVisibility();
   await ResourcePreloader.preloadAll();
 });
 
+/**
+ * Shows game over screen and plays game over sound
+ * @function
+ */
 function showGameOver() {
-  if (world && world.playGameOverSound) world.playGameOverSound();
+  world?.playGameOverSound?.();
   setGameScreens("over");
 }
+
+/**
+ * Shows game won screen and plays win sound
+ * @function
+ */
 function showGameWon() {
-  if (world && world.playWinSound) world.playWinSound();
+  world?.playWinSound?.();
   setGameScreens("won");
 }
