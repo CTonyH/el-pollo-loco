@@ -89,6 +89,9 @@ class World {
   /** @type {GameAudioManager} Handles all game audio */
   audioManager;
 
+  /** @type {UIManager} Handles all UI elements and messages */
+  uiManager;
+
   /**
    * Creates a new game world instance
    * @constructor
@@ -109,11 +112,12 @@ class World {
     this.canThrow = true;
     this.collisionManager = new CollisionManager(this);
     this.audioManager = new GameAudioManager(this);
+    this.uiManager = new UIManager(this);
 
     this.audioManager.setupBackgroundMusic();
     this.initializeStatusBars();
     this.setWorld();
-    this.updateTouchControlsForGameplay();
+    this.uiManager.updateTouchControlsForGameplay();
     this.render();
     this.run();
   }
@@ -172,63 +176,8 @@ class World {
     const bottlesToAdd = Math.min(5, maxBottles - this.char.bottles);
     this.char.bottles += bottlesToAdd;
     this.updateBottleStatusBar();
-    this.showBonusMessage("🎉 ALL COINS COLLECTED! +5 BOTTLES! 🎉");
+    this.uiManager.showBonusMessage("🎉 ALL COINS COLLECTED! +5 BOTTLES! 🎉");
     this.audioManager.playBonusSound();
-  }
-
-  /**
-   * Shows an animated bonus message on screen
-   * @param {string} message - The message to display
-   */
-  showBonusMessage(message) {
-    const messageElement = this.createBonusElement(message);
-    const style = this.createBonusStyles();
-
-    document.head.appendChild(style);
-    document.body.appendChild(messageElement);
-
-    setTimeout(() => {
-      document.body.removeChild(messageElement);
-      document.head.removeChild(style);
-    }, 3500);
-  }
-
-  /**
-   * Creates a bonus message DOM element
-   * @param {string} message - The message text
-   * @returns {HTMLElement} The styled message element
-   */
-  createBonusElement(message) {
-    const element = document.createElement("div");
-    element.textContent = message;
-    element.style.cssText = `
-      position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%);
-      background: linear-gradient(45deg, gold, orange); color: white;
-      padding: 20px 40px; border-radius: 15px; font-size: 24px;
-      font-family: 'Fredericka', cursive; font-weight: bold;
-      text-align: center; z-index: 2000; box-shadow: 0 0 30px gold;
-      animation: bounce 0.6s ease-in-out, fadeOut 2s ease-in-out 1.5s forwards;
-    `;
-    return element;
-  }
-
-  /**
-   * Creates CSS styles for bonus message animations
-   * @returns {HTMLStyleElement} The style element with animation CSS
-   */
-  createBonusStyles() {
-    const style = document.createElement("style");
-    style.textContent = `
-      @keyframes bounce {
-        0%, 20%, 50%, 80%, 100% { transform: translate(-50%, -50%) translateY(0); }
-        40% { transform: translate(-50%, -50%) translateY(-30px); }
-        60% { transform: translate(-50%, -50%) translateY(-15px); }
-      }
-      @keyframes fadeOut {
-        to { opacity: 0; transform: translate(-50%, -50%) scale(0.8); }
-      }
-    `;
-    return style;
   }
 
   /**
@@ -396,47 +345,15 @@ class World {
     this.ctx.restore();
   }
 
-  /**
-   * Updates touch controls for active gameplay
-   */
-  updateTouchControlsForGameplay() {
-    if (typeof updateTouchControls === "function") {
-      updateTouchControls();
-    }
-  }
-
-  /**
-   * Stops the game and cleans up all intervals and sounds
-   */
   stopGame() {
     this.gameRunning = false;
     this.cleanupIntervals();
     this.cleanupCharacter();
     this.cleanupEnemies();
     this.audioManager.stopBackgroundMusic();
-    this.hideTouchControlsOnGameEnd();
+    this.uiManager.hideTouchControlsOnGameEnd();
   }
 
-  /**
-   * Hides touch controls when game ends
-   */
-  hideTouchControlsOnGameEnd() {
-    const touchControls = document.getElementById("touch-controls");
-    const toggleButton = document.getElementById("touch-toggle");
-
-    if (touchControls) {
-      touchControls.style.display = "none";
-      touchControls.classList.remove("show");
-    }
-
-    if (toggleButton) {
-      toggleButton.style.display = "none";
-    }
-  }
-
-  /**
-   * Cleans up all intervals and animation frames
-   */
   cleanupIntervals() {
     [this.animationFrame, this.gameLoop].forEach(
       (ref) => ref && (ref === this.animationFrame ? cancelAnimationFrame(ref) : clearInterval(ref))
