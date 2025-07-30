@@ -1,0 +1,159 @@
+/* Touch Controls Styles */
+.touch-controls {
+  display: none;
+  position: absolute;
+  bottom: 10px;
+  left: 0;
+  right: 0;
+  height: 100px;
+  pointer-events: none;
+  z-index: 1000;
+}
+
+.touch-left-side {
+  position: absolute;
+  left: 15px;
+  bottom: 0;
+  display: flex;
+  gap: 15px;
+  align-items: center;
+}
+
+.touch-right-side {
+  position: absolute;
+  right: 15px;
+  bottom: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.dpad {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 5px;
+}
+
+.dpad-middle {
+  display: flex;
+  gap: 15px;
+  align-items: center;
+}
+
+.dpad-btn,
+.action-btn {
+  background: linear-gradient(145deg, rgba(175, 95, 38, 0.9), rgba(136, 80, 40, 0.9));
+  border: 3px solid #5c4033;
+  border-radius: 50%;
+  color: #fff5e1;
+  font-weight: bold;
+  cursor: pointer;
+  pointer-events: all;
+  user-select: none;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+  transition: all 0.1s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  line-height: 1;
+}
+
+.dpad-btn {
+  width: 45px;
+  height: 45px;
+  font-size: 14px;
+}
+
+.action-btn {
+  width: 55px;
+  height: 55px;
+  font-size: 16px;
+}
+
+.dpad-btn:active,
+.action-btn:active {
+  transform: scale(0.9);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+  background: linear-gradient(145deg, rgba(136, 80, 40, 0.9), rgba(175, 95, 38, 0.9));
+}
+
+#touch-toggle {
+  left: 20px;
+  display: none;
+  font-size: 18px;
+}
+
+/* Touch Controls Media Queries */
+@media (max-width: 767px) {
+  .touch-controls {
+    display: block;
+  }
+  #touch-toggle {
+    display: none !important;
+  }
+}
+
+@media (min-width: 768px) and (max-width: 900px) and (hover: none) and (pointer: coarse) {
+  .touch-controls {
+    display: block;
+  }
+  #touch-toggle {
+    display: flex;
+  }
+}
+
+@media (min-width: 768px) and (max-width: 1024px),
+  (min-width: 768px) and (hover: none) and (pointer: coarse),
+  (min-width: 1025px) and (max-width: 1366px) and (hover: none) and (pointer: coarse) {
+  #touch-toggle {
+    display: flex;
+  }
+  .touch-controls {
+    display: block;
+  }
+  .touch-controls.show {
+    display: block !important;
+  }
+}
+
+@media (max-width: 480px) {
+  .touch-controls {
+    bottom: 5px;
+    height: 85px;
+  }
+  .touch-left-side {
+    left: 10px;
+    gap: 10px;
+  }
+  .touch-right-side {
+    right: 10px;
+    gap: 6px;
+  }
+  .dpad-btn {
+    width: 40px;
+    height: 40px;
+    font-size: 12px;
+  }
+  .action-btn {
+    width: 48px;
+    height: 48px;
+    font-size: 14px;
+  }
+}
+
+@media (min-width: 481px) and (max-width: 720px) {
+  .touch-controls {
+    bottom: 8px;
+    height: 90px;
+  }
+  .touch-left-side {
+    left: 12px;
+    gap: 12px;
+  }
+  .touch-right-side {
+    right: 12px;
+    gap: 7px;
+  }
+}
