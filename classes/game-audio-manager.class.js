@@ -23,7 +23,6 @@ class GameAudioManager {
     if (this.backgroundMusic) {
       this.backgroundMusic.volume = 0.15;
       this.backgroundMusic.loop = true;
-      console.log("Background music setup completed");
     } else {
       console.warn("Failed to load background music");
     }
@@ -33,11 +32,6 @@ class GameAudioManager {
    * Starts playing the background music
    */
   startBackgroundMusic() {
-    console.log("Attempting to start background music", {
-      isMuted: typeof isMuted !== "undefined" ? isMuted : "undefined",
-      hasMusic: !!this.backgroundMusic,
-      isPaused: this.backgroundMusic ? this.backgroundMusic.paused : "no music",
-    });
     if (
       typeof isMuted !== "undefined" &&
       !isMuted &&
